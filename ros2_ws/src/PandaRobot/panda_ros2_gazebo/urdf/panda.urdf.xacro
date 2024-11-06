@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="panda">
+
+  <!-- ===== ARGUMENTS ===== -->
+
+  <!-- LAYOUT:  -->
+  <xacro:arg name="cell_layout_1" default="false"/>
+  <xacro:property name="cell_layout_1" value="$(arg cell_layout_1)"/>
+  
+  <!-- END-EFFECTOR:  -->
+  <xacro:arg name="EE_no" default="false"/>
+  <xacro:property name="EE_no" value="$(arg EE_no)"/>
+
+
+  <!-- Include XACRO-MACRO file of the PANDA ROBOT: -->
+  <xacro:include filename="$(find panda_ros2_gazebo)/urdf/panda_macro.urdf.xacro"/>	
+  <xacro:panda 
+    prefix=""
+    EE_no="${EE_no}"
+  />
+
+  <!-- Gazebo world link: -->
+  <link name="world"/>
+
+  <!-- PANDA ROBOT alone: -->
+  <xacro:if value="${cell_layout_1}">
+    <joint name="world-base_link-fixed" type="fixed">
+      <parent link="world"/>
+      <child link="panda_link0"/>
+    </joint>
+  </xacro:if>
+
+</robot>
