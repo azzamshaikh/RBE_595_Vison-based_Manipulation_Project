@@ -1,5 +1,8 @@
 # RBE_595_Group_Project
 
+## YCB Models
+To load the YCB models, copy all the models from the `gazebo_ycb/models/` folder to your local `~/.gazebo/models` folder.
+
 ## Launch Simulation
 In a terminal, build and source the workspace and run
 ```
