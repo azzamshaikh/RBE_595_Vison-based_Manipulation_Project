@@ -43,7 +43,7 @@ def generate_launch_description():
     panda_ros2_gazebo = os.path.join(
         get_package_share_directory('panda_ros2_gazebo'),
         'worlds',
-        'panda.world')
+        'panda_ycb.world')
     # DECLARE Gazebo LAUNCH file:
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
