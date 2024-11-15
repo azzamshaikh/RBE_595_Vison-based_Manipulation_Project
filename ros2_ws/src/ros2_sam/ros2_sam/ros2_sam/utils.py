@@ -71,7 +71,7 @@ class SAMDownloader:
 
     def check_model_availability(
         self,
-        model_type: str = "vit_h",
+        model_type: str = "vit_b",
     ) -> bool:
         return os.path.isfile(
             os.path.join(
@@ -82,7 +82,7 @@ class SAMDownloader:
 
     def download(
         self,
-        model_type: str = "vit_h",
+        model_type: str = "vit_b",
     ) -> bool:
         model_url = self._model_url_dict[model_type]
         if not self.check_model_availability(model_type):

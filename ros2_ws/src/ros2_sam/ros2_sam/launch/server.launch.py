@@ -16,7 +16,7 @@ def generate_launch_description() -> LaunchDescription:
     ld.add_action(
         DeclareLaunchArgument(
             "model_type",
-            default_value="vit_h",
+            default_value="vit_l",
             choices=["vit_h", "vit_b", "vit_l"],
             description="Type of the model to use",
         )
