@@ -12,7 +12,7 @@
 
     <include>
       <uri>model://table</uri>
-      <pose>1.25 0 -0.5 0 0 -1.57</pose>
+      <pose>1.0 0 -0.5 0 0 -1.57</pose>
     </include>
 
     <include>
@@ -23,38 +23,38 @@
     <include>
       <name>crackerbox1</name>
       <uri>model://cracker_box</uri>
-      <pose>1 0.5 0.51 0 0 3.14</pose>
+      <pose>0.75 0.1 0.51 0 0 3.14</pose>
     </include>
 
     <include>
       <name>crackerbox2</name>
       <uri>model://cracker_box</uri>
-      <pose>1.1 0.5 0.51 0 0 3.14</pose>
+      <pose>0.85 0.1 0.51 0 0 3.14</pose>
     </include>
 
 
     <include>
       <name>crackerbox3</name>
       <uri>model://cracker_box</uri>
-      <pose>1.2 0.5 0.51 0 0 3.14</pose>
+      <pose>0.95 0.1 0.51 0 0 3.14</pose>
     </include>
 
     <include>
       <name>gelatinbox1</name>
       <uri>model://gelatin_box</uri>
-      <pose>1 -0.5 0.51 0 0 3.4</pose>
+      <pose>0.75 -0.5 0.51 0 0 3.4</pose>
     </include>
 
     <include>
       <name>gelatinbox2</name>
       <uri>model://gelatin_box</uri>
-      <pose>1.1 -0.5 0.51 0 0 3.4</pose>
+      <pose>0.85 -0.5 0.51 0 0 3.4</pose>
     </include>
 
     <include>
       <name>gelatinbox3</name>
       <uri>model://gelatin_box</uri>
-      <pose>1.2 -0.5 0.51 0 0 3.4</pose>
+      <pose>0.95 -0.5 0.51 0 0 3.4</pose>
     </include>
 
     <include>

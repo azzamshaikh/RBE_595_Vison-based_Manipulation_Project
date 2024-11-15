@@ -1,0 +1,13 @@
+{'action': 'MoveJs', 'value': {'joint1': 0.0, 'joint2': 0.0, 'joint3': 0.0, 'joint4': 0.0, 'joint5': 0.0, 'joint6': 0.0, 'joint7': 0.0}, 'speed': 1.0}
+{'action': 'MoveR', 'value': {'joint': 'joint1', 'value': 5.0}, 'speed': 1.0}
+{'action': 'GripperOpen'}
+{'action': 'MoveL', 'value': {'movex': 0.0, 'movey': 0.1, 'movez': 0.0}, 'speed': 1.0}
+{'action': 'MoveR', 'value': {'joint': 'joint1', 'value': -5.0}, 'speed': 1.0}
+{'action': 'MoveL', 'value': {'movex': 0.0, 'movey': 0.0, 'movez': -0.5}, 'speed': 1.0}
+{'action': 'MoveL', 'value': {'movex': 0.45, 'movey': 0.0, 'movez': 0.0}, 'speed': 1.0}
+{'action': 'Attach' ,'value': {'object' : 'crackerbox1' ,'endeffector' : 'end_effector_frame'}}
+{'action': 'GripperClose'}
+{'action': 'MoveL', 'value': {'movex': 0.0, 'movey': 0.0, 'movez': 0.1}, 'speed': 1.0}
+{'action': 'MoveR', 'value': {'joint': 'joint1', 'value': 90.0}, 'speed': 1.0}
+{'action': 'GripperOpen'}
+{'action': 'Detach', 'value': {'object': 'crackerbox1'}}

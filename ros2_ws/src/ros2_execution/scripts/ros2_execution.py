@@ -747,11 +747,12 @@ def main(args=None):
     ros2_execution_package_share_path = get_package_share_directory(package_name)
     path = ros2_execution_package_share_path.split('/')
     index = path.index(package_name)
-    path[index-1] = "ros2_ws/src"
+    path[index-1] = "src"
     ros2_execution_package_path = '/'.join(path[:index+1])
     ###
 
     filepath = os.path.join(ros2_execution_package_path, 'programs', PR_NAME + ".txt")
+    nodeLOG.get_logger().info(filepath)
     EXISTS = os.path.exists(filepath)
     if (EXISTS == True):
         print(PR_NAME + " file found! Executing program...")

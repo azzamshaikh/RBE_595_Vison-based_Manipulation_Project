@@ -19,6 +19,8 @@
     EE_no="${EE_no}"
   />
 
+  <!-- <xacro:include filename="$(find panda_ros2_gazebo)/urdf/camera_macro.urdf.xacro"/>	 -->
+  
   <!-- Gazebo world link: -->
   <link name="world"/>
 
@@ -27,6 +29,12 @@
     <joint name="world-base_link-fixed" type="fixed">
       <parent link="world"/>
       <child link="panda_link0"/>
+    </joint>
+
+    <joint name="world-camera_link-fixed" type="fixed">
+      <origin xyz="0 0 1.5" rpy="0 0.6 3.14"/>
+      <parent link="world"/>
+      <child link="camera_link"/>
     </joint>
   </xacro:if>
 
