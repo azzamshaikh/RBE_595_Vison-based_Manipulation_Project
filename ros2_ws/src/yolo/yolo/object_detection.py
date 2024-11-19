@@ -16,7 +16,7 @@ class RealSenseSubscriber(Node):
 
     def __init__(self):
         super().__init__('yolo')
-        ### Azzam - Modify filepath generation code to be relative versus absolute
+        
         package_name = 'yolo'
         ros2_execution_package_share_path = get_package_share_directory(package_name)
         path = ros2_execution_package_share_path.split('/')
@@ -24,11 +24,9 @@ class RealSenseSubscriber(Node):
         path[index-1] = "src"
         yolo_package_path = '/'.join(path[:index+1])
         model_path = os.path.join(yolo_package_path, 'model','best.pt')
-        ###
-
-
+        
         self.detection_model = YOLO(model_path)
-        folder_path = os.path.join(os.getcwd(),"src","yolo_finetune","ycb_dataset")
+        folder_path = os.path.join(os.getcwd(),"src","yolo_finetune","ycb_foods")
         yaml_path = os.path.join(folder_path, "data.yaml")
         with open(yaml_path,'r') as file:
             self.yaml_data = yaml.safe_load(file)
