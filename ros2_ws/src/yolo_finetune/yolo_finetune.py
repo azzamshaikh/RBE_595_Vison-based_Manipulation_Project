@@ -32,7 +32,7 @@ test_bbox_folder_path = os.path.join(folder_path, "test","labels")
 # Loop through files in the folder
 for idx ,(image_filename, label_filename) in enumerate(zip(os.listdir(test_image_folder_path), os.listdir(test_bbox_folder_path))):
 
-    if idx > 10:
+    if idx > 3:
         break
 
     image_filepath = os.path.join(test_image_folder_path, image_filename)
@@ -76,9 +76,10 @@ for idx ,(image_filename, label_filename) in enumerate(zip(os.listdir(test_image
             cv.putText(image,data_label,(x1, y1 - 10),cv.FONT_HERSHEY_SIMPLEX, 0.5,(0,255,0),1,cv.LINE_AA)
         
         cv.imshow('Image', image)
-        cv.waitKey(0)
+
 
         results = model(image_filepath)
         results[0].show()
+        cv.waitKey(0)
 
-torch.save(model,'ycb_food.pt')
+torch.save(model,'ycb_food_lower_brightness.pt')

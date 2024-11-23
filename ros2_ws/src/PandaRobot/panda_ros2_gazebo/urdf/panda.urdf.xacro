@@ -32,7 +32,8 @@
     </joint>
 
     <joint name="world-camera_link-fixed" type="fixed">
-      <origin xyz="0 0 1.5" rpy="0 0.6 3.14"/>
+      <!-- <origin xyz="0 0 1.5" rpy="0 0.6 3.14"/> -->
+      <origin xyz="0.5 0 0.8" rpy="0 0 0"/>
       <parent link="world"/>
       <child link="camera_link"/>
     </joint>

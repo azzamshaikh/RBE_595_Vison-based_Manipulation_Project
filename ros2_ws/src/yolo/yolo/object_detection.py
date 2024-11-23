@@ -23,7 +23,7 @@ class RealSenseSubscriber(Node):
         index = path.index(package_name)
         path[index-1] = "src"
         yolo_package_path = '/'.join(path[:index+1])
-        model_path = os.path.join(yolo_package_path, 'model','best.pt')
+        model_path = os.path.join(yolo_package_path, 'model','best_org.pt')
         
         self.detection_model = YOLO(model_path)
         folder_path = os.path.join(os.getcwd(),"src","yolo_finetune","ycb_foods")
