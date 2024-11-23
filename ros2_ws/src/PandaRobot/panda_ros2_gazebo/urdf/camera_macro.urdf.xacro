@@ -69,7 +69,7 @@
 	            <horizontal_fov>1.047198</horizontal_fov>
 	            <image>
 	                <width>640</width>
-	                <height>480</height>
+	                <height>640</height>
 	                <format>B8G8R8</format>  <!--Changed format since channels were inverted, to go back, change to R8G8B8-->
 	            </image>
 	            <clip>
