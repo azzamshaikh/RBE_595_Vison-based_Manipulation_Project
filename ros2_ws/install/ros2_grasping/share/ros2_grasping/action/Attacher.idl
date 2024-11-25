@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from ros2_grasping/action/Attacher.action
+// generated code does not contain a copyright notice
+
+
+module ros2_grasping {
+  module action {
+    struct Attacher_Goal {
+      @verbatim (language="comment", text=
+        "Name of the object to be attached.")
+      string object;
+
+      @verbatim (language="comment", text=
+        "Name of the link that the object will be attached to.")
+      string endeffector;
+    };
+    struct Attacher_Result {
+      string result;
+    };
+    struct Attacher_Feedback {
+      string feedback;
+    };
+  };
+};

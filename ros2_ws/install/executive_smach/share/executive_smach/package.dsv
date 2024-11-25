@@ -1,0 +1,8 @@
+source;share/executive_smach/hook/cmake_prefix_path.ps1
+source;share/executive_smach/hook/cmake_prefix_path.dsv
+source;share/executive_smach/hook/cmake_prefix_path.sh
+source;share/executive_smach/local_setup.bash
+source;share/executive_smach/local_setup.dsv
+source;share/executive_smach/local_setup.ps1
+source;share/executive_smach/local_setup.sh
+source;share/executive_smach/local_setup.zsh

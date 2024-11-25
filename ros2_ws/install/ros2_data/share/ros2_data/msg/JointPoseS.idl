@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from ros2_data/msg/JointPoseS.msg
+// generated code does not contain a copyright notice
+
+
+module ros2_data {
+  module msg {
+    struct JointPoseS {
+      double joint1;
+
+      double joint2;
+
+      double joint3;
+
+      double joint4;
+
+      double joint5;
+
+      double joint6;
+
+      double joint7;
+    };
+  };
+};

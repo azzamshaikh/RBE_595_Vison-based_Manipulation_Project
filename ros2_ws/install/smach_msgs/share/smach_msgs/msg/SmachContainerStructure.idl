@@ -1,0 +1,34 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from smach_msgs/msg/SmachContainerStructure.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module smach_msgs {
+  module msg {
+    struct SmachContainerStructure {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "The path to this node in the server")
+      string path;
+
+      @verbatim (language="comment", text=
+        "The children of this node")
+      sequence<string> children;
+
+      @verbatim (language="comment", text=
+        "The outcome edges" "\n"
+        "Each index across these arrays denote one edge")
+      sequence<string> internal_outcomes;
+
+      sequence<string> outcomes_from;
+
+      sequence<string> outcomes_to;
+
+      @verbatim (language="comment", text=
+        "The potential outcomes from this container")
+      sequence<string> container_outcomes;
+    };
+  };
+};

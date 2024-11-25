@@ -1,0 +1,6 @@
+msg/SmachContainerInitialStatusCmd.idl
+msg/SmachContainerInitialStatusCmd.msg
+msg/SmachContainerStatus.idl
+msg/SmachContainerStatus.msg
+msg/SmachContainerStructure.idl
+msg/SmachContainerStructure.msg

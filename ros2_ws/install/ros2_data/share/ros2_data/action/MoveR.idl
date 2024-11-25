@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from ros2_data/action/MoveR.action
+// generated code does not contain a copyright notice
+
+
+module ros2_data {
+  module action {
+    struct MoveR_Goal {
+      string joint;
+
+      double value;
+
+      double speed;
+    };
+    struct MoveR_Result {
+      string result;
+    };
+    struct MoveR_Feedback {
+      string feedback;
+    };
+  };
+};

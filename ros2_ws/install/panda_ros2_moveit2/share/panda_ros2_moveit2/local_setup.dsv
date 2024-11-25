@@ -1,0 +1,2 @@
+source;share/panda_ros2_moveit2/environment/ament_prefix_path.sh
+source;share/panda_ros2_moveit2/environment/path.sh

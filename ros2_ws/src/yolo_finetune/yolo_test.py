@@ -6,6 +6,7 @@ import torch
 
 # Load a model
 model = YOLO("/home/azzam/RBE_595_Group_Project/ros2_ws/runs/detect/train/weights/best.pt")
+# model = YOLO("/home/workspace/vbrm/RBE_595_Group_Project/ros2_ws/src/yolo/model/best.pt")
 
 folder_path = os.path.join(os.getcwd(),"src","yolo_finetune","ycb_foods")
 yaml_path = os.path.join(folder_path, "data.yaml")
