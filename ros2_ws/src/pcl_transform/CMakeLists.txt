@@ -33,8 +33,21 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable(camera_to_world src/camera_to_world.cpp)
 target_link_libraries(camera_to_world ${PCL_LIBRARIES} ${tf2_ros_LIBRARIES} ${tf2_eigen_LIBRARIES})
 
+add_executable(downsample src/downsample.cpp)
+target_link_libraries(downsample ${PCL_LIBRARIES} ${tf2_ros_LIBRARIES} ${tf2_eigen_LIBRARIES})
+
 ament_target_dependencies(
   camera_to_world
+  rclcpp
+  std_msgs
+  sensor_msgs
+  pcl_conversions
+  tf2_ros
+  tf2_eigen  
+)
+
+ament_target_dependencies(
+  downsample
   rclcpp
   std_msgs
   sensor_msgs
@@ -46,6 +59,7 @@ ament_target_dependencies(
 # Install the executables
 install(TARGETS
   camera_to_world
+  downsample
   DESTINATION lib/${PROJECT_NAME}
 )
 
