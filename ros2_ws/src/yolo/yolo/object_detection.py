@@ -11,6 +11,7 @@ import cv2 as cv
 import yaml
 import os
 from ament_index_python.packages import get_package_share_directory
+import numpy as np
 
 class RealSenseSubscriber(Node):
 
@@ -37,7 +38,7 @@ class RealSenseSubscriber(Node):
         self.classification = None
         self.total_detections = None
         self.pred_img_pub = self.create_publisher(Image,"/yolo/prediction/image", 10)
-        self.pred_bbox_pub = self.create_publisher(Float64MultiArray,"/yolo/prediction/bbox", 10)
+        self.pred_bbox_pub = self.create_publisher(Int32MultiArray,"/yolo/prediction/bbox", 10)
         self.pred_cls_pub = self.create_publisher(Int32MultiArray,"/yolo/prediction/classifier", 10)
         self.pred_num_pub = self.create_publisher(Int32, "/yolo/prediction/number_of_predictions",10)
         self.image = None
@@ -76,14 +77,15 @@ class RealSenseSubscriber(Node):
         # cv.waitKey(1)
     
     def publish_data(self,):
-        bbox = Float64MultiArray()
+        bbox = Int32MultiArray()
         classification = Int32MultiArray()
         num_pred = Int32()
         if self.annotated_frame is not None:
             self.pred_img_pub.publish(self.bridge.cv2_to_imgmsg(self.annotated_frame,'bgr8'))
             
         if self.bboxes:
-            bbox.data = self.bboxes
+            bbox.data = np.array(self.bboxes).astype(int).tolist()
+
         
         if self.classification:
             classification.data = self.classification
@@ -101,7 +103,7 @@ class RealSenseSubscriber(Node):
 
         if self.image is not None:
             # image =self.image.copy() # USE FOR THE OPENCV BBOX AND LABELING
-            results = self.detection_model(self.image)
+            results = self.detection_model(self.image,verbose=False)
             self.bboxes = []
             self.classification = []
             self.total_detections = 0
