@@ -42,6 +42,7 @@ install(
 # ===== PYTHON SCRIPTS ===== #
 install(PROGRAMS
   scripts/ros2_execution.py
+  scripts/execution_node.py
   DESTINATION lib/${PROJECT_NAME} 
 )
 
