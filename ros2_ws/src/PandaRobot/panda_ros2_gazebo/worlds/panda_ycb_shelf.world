@@ -24,18 +24,15 @@
       <direction>0 0 -1</direction>
     </light>
 
-    <include>
+    <!-- <include>
       <uri>model://table</uri>
-      <pose>0 0.9 -0.5 0 0 3.14</pose>
-    </include>
+      <pose>1.0 0 -0.5 0 0 -1.57</pose>
+    </include> -->
 
     <include>
-      <name>sugar3</name>
-      <uri>model://sugar_box</uri>
-      <pose>0.0 0.65 0.51 0 0 3.14</pose>
+      <uri>model://bookshelf</uri>
+      <pose>0.8 0 0 0 0 -1.57</pose>
     </include>
-
-
 
     <!-- <include>
       <name>crackerbox1</name>
@@ -73,11 +70,6 @@
       <uri>model://gelatin_box</uri>
       <pose>0.95 -0.5 0.51 0 0 3.4</pose>
     </include> -->
-
-    <!-- <include>
-      <uri>model://bookshelf</uri>
-      <pose>0.8 0 0 0 0 -1.57</pose>
-    </include>
 
     <include>
       <name>sugar1</name>
@@ -150,7 +142,7 @@
       <name>tomato3_top_shelf</name>
       <uri>model://tomato_soup_can</uri>
       <pose>0.65 -0.26 0.81 0 0 3.14</pose>
-    </include> -->
+    </include>
 
     <scene>
       <shadows>0</shadows>
