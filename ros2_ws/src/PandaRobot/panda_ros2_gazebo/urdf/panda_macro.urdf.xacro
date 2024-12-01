@@ -9,7 +9,7 @@
     <xacro:property name="axel_offset" value="0.05" /> <!-- Space btw top of beam and the each joint -->
 
     <!-- Import Rviz colors -->
-    <xacro:include filename="$(find panda_ros2_gazebo)/urdf/materials.xacro" />
+    <!-- <xacro:include filename="$(find panda_ros2_gazebo)/urdf/materials.xacro" /> -->
   
     <!-- Load PANDA ROBOT TRANSMISSION file: -->
     <xacro:include filename="$(find panda_ros2_gazebo)/urdf/panda_transmission.xacro" />
@@ -25,15 +25,13 @@
     />
 
     <!-- ***** PANDA ROBOT .urdf SERIAL CHAIN ***** -->
-    <link name="camera_link">
+    <!-- <link name="camera_link">
         <collision>
-            <!-- <origin xyz="0 0 1.5" rpy="0 0.78 0"/> -->
             <geometry>
                 <box size="0.1 0.15 0.1 "/>
             </geometry>
         </collision>
         <visual>
-            <!-- <origin xyz="0 0 1.5" rpy="0 0.78 0"/> -->
             <geometry>
                 <box size="0.1 0.15 0.1 "/>
             </geometry>
@@ -43,19 +41,17 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
         </inertial>
-    </link>
+    </link> -->
 
 
 
-    <link name="lens">
+    <!-- <link name="lens">
         <collision>
-            <!-- <origin xyz="0 0 1.5" rpy="0 0.78 0"/> -->
             <geometry>
                 <box size="0.2 0.025 0.025"/>
             </geometry>
         </collision>
         <visual>
-            <!-- <origin xyz="0 0 1.5" rpy="0 0.78 0"/> -->
             <geometry>
                 <box size="0.2 0.025 0.025"/>
             </geometry>
@@ -65,22 +61,23 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
         </inertial>
-    </link>
+    </link> -->
 
-    <joint name="lens_to_camera" type="fixed">
+    <!-- <joint name="lens_to_camera" type="fixed">
         <origin xyz="0.05 0 0" rpy="0 0 3.14"/>
         <parent link="camera_link"/>
         <child link="lens"/>
-    </joint>
+    </joint> -->
 
 
-    <link name="camera_link_optical" />
+    <!-- <link name="camera_link_optical" />
     <joint name="camera_optical_joint" type="fixed">
         <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
-    </joint>
-    <gazebo reference="camera_link">
+    </joint> -->
+    
+    <!-- <gazebo reference="camera_link">
         <sensor type="depth" name="realsense">
 	        <always_on>1</always_on>
 	        <visualize>true</visualize>
@@ -90,7 +87,7 @@
 	            <image>
 	                <width>640</width>
 	                <height>640</height>
-	                <format>B8G8R8</format>  <!--Changed format since channels were inverted, to go back, change to R8G8B8-->
+	                <format>B8G8R8</format> 
 	            </image>
 	            <clip>
 	                <near>0.01</near>
@@ -127,7 +124,7 @@
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>
         <material> Gazebo/Red </material>
-    </gazebo>
+    </gazebo> -->
 
     <!-- panda_link0 -->
     <link name="panda_link0">

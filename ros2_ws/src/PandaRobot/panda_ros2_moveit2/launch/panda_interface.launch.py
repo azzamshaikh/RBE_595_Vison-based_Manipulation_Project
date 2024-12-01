@@ -86,6 +86,26 @@ def generate_launch_description():
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'panda'],
                         output='screen')
+    
+
+    camera_description_path = os.path.join(
+        get_package_share_directory('panda_ros2_gazebo')
+    )
+    camera_file = os.path.join(camera_description_path,
+                                     'urdf',
+                                     'camera.urdf')
+    camera_doc = open(camera_file).read()
+    camera_description = {'robot_description': camera_doc}
+    camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
+                        arguments=['-file',camera_file,
+                                   '-entity', 'camera',
+                                   '-x', '0.0',
+                                   '-y', '0.0',
+                                   '-z', '1.35',
+                                   '-R', '0.0',
+                                   '-P', '0.6',
+                                   '-Y', '1.57'],
+                        output='both')
 
     # ***** STATIC TRANSFORM ***** #
     # NODE -> Static TF:
@@ -104,6 +124,24 @@ def generate_launch_description():
         parameters=[
             robot_description,
             {"use_sim_time": True}
+        ]
+    )
+
+    static_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="camera_transform",
+        output="log",
+        arguments=[
+            # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
+            "0.0",
+            "0.0",
+            "1.35",
+            "0.0",
+            "0.6",
+            "1.57",
+            "panda_link0",
+            "camera_link_optical"
         ]
     )
 
@@ -139,7 +177,7 @@ def generate_launch_description():
     
     # Command-line argument: RVIZ file?
     rviz_arg = DeclareLaunchArgument(
-        "rviz_file", default_value="False", description="Load RVIZ file."
+        "rviz_file", default_value="True", description="Load RVIZ file."
     )
 
     # *** PLANNING CONTEXT *** #
@@ -297,6 +335,7 @@ def generate_launch_description():
             # Gazebo nodes:
             gazebo, 
             spawn_entity,
+            camera_spawn,
             # ROS2_CONTROL:
             static_tf,
             robot_state_publisher,

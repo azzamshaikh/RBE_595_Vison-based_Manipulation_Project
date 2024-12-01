@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
+<robot name="camera">
 
-<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- Gazebo world link: -->
+    <link name="world"/>
 
-  <!-- XACRO-MACRO of camera ROBOT: -->
-  <xacro:macro name="camera">
-
-
-    <link name = "world"/>
     <joint name="world_to_base" type="fixed">
+      <!-- <origin xyz="0 0 1.5" rpy="0 0.6 3.14"/> -->
+      <!-- <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/> -->
         <parent link="world"/>
         <child link="camera_link"/>
     </joint>
@@ -109,7 +108,4 @@
         <material> Gazebo/Red </material>
     </gazebo>
 
-  </xacro:macro>
-
 </robot>
-
