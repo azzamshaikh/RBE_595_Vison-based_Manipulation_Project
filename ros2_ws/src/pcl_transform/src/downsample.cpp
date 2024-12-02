@@ -64,7 +64,7 @@ private:
         // Convert transformed PCL point cloud back to sensor_msgs::PointCloud2
         sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
         pcl::toROSMsg(*filtered_cloud, transformed_cloud_msg);
-        transformed_cloud_msg.header.frame_id = "world";
+        transformed_cloud_msg.header.frame_id = "camera_link_optical";
         transformed_cloud_msg.header.stamp = this->get_clock()->now();
 
         transformed_pointcloud_publisher_->publish(transformed_cloud_msg);
