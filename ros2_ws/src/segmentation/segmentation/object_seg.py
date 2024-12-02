@@ -15,7 +15,7 @@ from geometry_msgs.msg import Point
 from tf2_ros import TransformListener, Buffer
 from geometry_msgs.msg import TransformStamped
 import tf_transformations
-import open3d as o3d
+#import open3d as o3d
 
 
 class PointCloudExtractor(Node):
@@ -61,7 +61,7 @@ class PointCloudExtractor(Node):
         
         self.pointcloud_sub = self.create_subscription(
             PointCloud2,
-            '/realsense/points',
+            '/downsampled_pointcloud_data',
             self.pointcloud_callback,
             10
         )
@@ -156,12 +156,14 @@ class PointCloudExtractor(Node):
         self.pointcloud = xyz
         self.pc_rgb = rgb
         self.pointcloud_kd_tree = KDTree(xyz)
-        point_cloud = o3d.geometry.PointCloud()
-        point_cloud.points = o3d.utility.Vector3dVector(np.array(self.pointcloud))
-        o3d.io.write_point_cloud("output_full.pcd", point_cloud)
-        self.get_logger().info("Saved")
-        self.break_flag_ = True
+        # point_cloud = o3d.geometry.PointCloud()
+        # point_cloud.points = o3d.utility.Vector3dVector(np.array(self.pointcloud))
+        # o3d.io.write_point_cloud("output_full.pcd", point_cloud)
+        # self.get_logger().info("Saved")
+        # self.break_flag_ = True
     
+    def remove_outlier(self, k=10):
+        self.pointcloud_kd_tree.query()
     
     def downsample_depth_image(self, depth_image):
         """Downsample the depth image."""
@@ -242,12 +244,12 @@ class PointCloudExtractor(Node):
 
         # Query points from cropped depth in KD-Tree
         query_points = np.stack((x, y, z), axis=-1)
-        num_samples = int(len(query_points) * 0.01)
+        num_samples = int(len(query_points))# * 0.01)
         indices = np.random.choice(len(query_points), num_samples, replace=False)
 
         # Select the corresponding points
         selected_points = [query_points[i] for i in indices]
-        distances, indices = self.pointcloud_kd_tree.query(selected_points, k=1,distance_upper_bound=0.001)
+        distances, indices = self.pointcloud_kd_tree.query(selected_points, k=1,distance_upper_bound=0.0025)
 
         # Filter valid indices and construct the new point cloud
         valid_indices = indices[distances < np.inf]
@@ -282,28 +284,37 @@ class PointCloudExtractor(Node):
             transformed_points.append((new_pt.x, new_pt.y, new_pt.z))        
 
 
-        # transform the entire view
-        transformed_full = []
-        for x, y, z in self.pointcloud:
+        # # transform the entire view
+        # transformed_full = []
+        # for x, y, z in self.pointcloud:
 
-            pt = Point()
-            pt.x, pt.y, pt.z = float(x), float(y), float(z)
+        #     pt = Point()
+        #     pt.x, pt.y, pt.z = float(x), float(y), float(z)
 
-            new_pt = self.transform_point(transform, pt)
-            transformed_full.append((new_pt.x, new_pt.y, new_pt.z))   
+        #     new_pt = self.transform_point(transform, pt)
+        #     transformed_full.append((new_pt.x, new_pt.y, new_pt.z))   
         
 
 
         points = []  # List to store the merged points
 
-        # Iterate through both lists and merge them
-        for (x, y, z), (r, g, b) in zip(transformed_points, extracted_rgb):
+        # # Iterate through both lists and merge them
+        # for (x, y, z), (r, g, b) in zip(transformed_points, extracted_rgb):
+        #     # Convert RGB values to a 32-bit integer
+        #     # rgb = struct.unpack('I', struct.pack('BBBB', b, g, r, 1))[0]  # Pack RGB into an integer
+
+        #     rgb = int(r) << 16 | int(g) << 8 | int(b)
+        #     pt = [x, y, z, rgb]  # Create a point with (x, y, z, rgb)
+        #     points.append(pt)  # Add the point to the list      
+
+                # Iterate through both lists and merge them
+        for (x, y, z) in transformed_points:
             # Convert RGB values to a 32-bit integer
             # rgb = struct.unpack('I', struct.pack('BBBB', b, g, r, 1))[0]  # Pack RGB into an integer
 
-            rgb = int(r) << 16 | int(g) << 8 | int(b)
-            pt = [x, y, z, rgb]  # Create a point with (x, y, z, rgb)
-            points.append(pt)  # Add the point to the list      
+            #rgb = int(r) << 16 | int(g) << 8 | int(b)
+            pt = [x, y, z]  # Create a point with (x, y, z, rgb)
+            points.append(pt)  # Add the point to the list    
 
         header = Header()
         header.frame_id = 'world'
@@ -312,7 +323,7 @@ class PointCloudExtractor(Node):
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
+            #PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
         ]
         extraction = pc2.create_cloud(header,fields,points)
 

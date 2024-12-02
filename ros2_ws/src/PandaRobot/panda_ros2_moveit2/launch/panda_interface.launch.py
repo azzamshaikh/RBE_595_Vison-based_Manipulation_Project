@@ -168,7 +168,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="camera_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "camera_link"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
         # [
         #     # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
         #     "0.0",
