@@ -1,0 +1,14 @@
+# Request: Bounding box in pixel coordinates
+int32 bbox_min_x
+int32 bbox_min_y
+int32 bbox_max_x
+int32 bbox_max_y
+
+---
+
+# Response: Grasp position in 3D world coordinates
+float32 x
+float32 y
+float32 z
+float32 angle
+float32 width

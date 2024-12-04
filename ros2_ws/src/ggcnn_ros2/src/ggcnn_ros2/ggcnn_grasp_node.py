@@ -7,10 +7,13 @@ import numpy as np
 import torch
 from skimage.filters import gaussian
 from sensor_msgs.msg import Image, CameraInfo
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray, Int32MultiArray
 from cv_bridge import CvBridge
 from ament_index_python.packages import get_package_share_directory
 from ggcnn_ros2.ggcnn2 import GGCNN
+import tf2_ros
+from geometry_msgs.msg import TransformStamped
+import transforms3d
 
 bridge = CvBridge()
 
@@ -71,6 +74,15 @@ def plot_rectangle_on_image(image, grasp_x, grasp_y, angle, grasp_width):
 class GGCNNGraspNode(Node):
     def __init__(self):
         super().__init__('ggcnn_grasp_node')
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+
+        self.subscription = self.create_subscription(
+            Int32MultiArray,
+            '/yolo/prediction/bbox',
+            self.bbox_callback,
+            10
+        )
 
         self.model = GGCNN()
         package_share_directory = get_package_share_directory('ggcnn_ros2')
@@ -87,6 +99,52 @@ class GGCNNGraspNode(Node):
         self.grasp_pub = self.create_publisher(Float32MultiArray, 'ggcnn/out/command', 10)
         self.depth_sub = self.create_subscription(Image, '/realsense/depth/image_raw', self.depth_image_callback, 10)
         self.camera_info_sub = self.create_subscription(CameraInfo, '/realsense/camera_info', self.camera_info_callback, 10)
+        self.bbox = None
+
+    def bbox_callback(self, msg):
+        data = msg.data
+        if len(data) >= 4:
+            self.bbox = (int(data[0]), int(data[1]), int(data[2]), int(data[3]))
+            self.get_logger().info(f"Received bounding box: {self.bbox}")
+
+    def transform_to_matrix(self, transform):
+        translation = transform.transform.translation
+        rotation = transform.transform.rotation
+        t_matrix = np.eye(4)
+        t_matrix[0, 3] = translation.x
+        t_matrix[1, 3] = translation.y
+        t_matrix[2, 3] = translation.z
+        q = [rotation.w, rotation.x, rotation.y, rotation.z]  # Note the order of quaternion elements
+        t_matrix[:3, :3] = transforms3d.quaternions.quat2mat(q)
+        return t_matrix
+
+    def get_patch(self, depth_image, bbox):
+
+        min_x, min_y, max_x, max_y = bbox
+        center_x = (min_x + max_x) // 2
+        center_y = (min_y + max_y) // 2
+
+        top_left_x = center_x - 150
+        top_left_y = center_y - 150
+
+        if top_left_x < 0:
+            top_left_x = 0
+        elif top_left_x + 300 > depth_image.shape[1]:
+            top_left_x = depth_image.shape[1] - 300
+
+        if top_left_y < 0:
+            top_left_y = 0
+        elif top_left_y + 300 > depth_image.shape[0]:
+            top_left_y = depth_image.shape[0] - 300
+
+        top_left_x = max(0, min(top_left_x, depth_image.shape[1] - 300))
+        top_left_y = max(0, min(top_left_y, depth_image.shape[0] - 300))
+
+        depth_crop = depth_image[top_left_y:top_left_y + 300, top_left_x:top_left_x + 300]
+        # new_bbox = (min_x - top_left_x, min_y - top_left_y, max_x - top_left_x, max_y - top_left_y)
+
+        return depth_crop, (top_left_x, top_left_y)
+
 
     def camera_info_callback(self, camera_info_msg):
         """Get camera intrinsics."""
@@ -105,20 +163,29 @@ class GGCNNGraspNode(Node):
         self.intrinsics_initialized = True
         self.destroy_subscription(self.camera_info_sub)
 
+
     def depth_image_callback(self, depth_msg):
         if not self.intrinsics_initialized:
             print("Camera intrinsics not yet initialized.")
+            return
+        
+        if self.bbox is None:
+            print("Bounding box not yet received.")
             return
 
         # Convert depth image from ROS message to numpy array
         depth_image = bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
 
         # Preprocess depth image: Crop and resize to match the model input size (300x300)
-        crop_size = 400
-        depth_crop = depth_image[
-            (depth_image.shape[0] - crop_size) // 2 : (depth_image.shape[0] + crop_size) // 2,
-            (depth_image.shape[1] - crop_size) // 2 : (depth_image.shape[1] + crop_size) // 2,
-        ]
+        # crop_size = 400
+        # depth_crop = depth_image[
+        #     (depth_image.shape[0] - crop_size) // 2 : (depth_image.shape[0] + crop_size) // 2,
+        #     (depth_image.shape[1] - crop_size) // 2 : (depth_image.shape[1] + crop_size) // 2,
+        # ]
+
+        #take the bounding box center and crop 300x300 around it
+
+        depth_crop, updated_top_corner = self.get_patch(depth_image, self.bbox)
 
         depth_resized = cv2.resize(depth_crop, (300, 300))
         #normalize depth image
@@ -137,31 +204,77 @@ class GGCNNGraspNode(Node):
 
         # Post-process model outputs
         q_img, ang_img, width_img = self.post_process_output(pos_output, cos_output, sin_output, width_output)
-
+        print(q_img.min(), q_img.max())
         # Calculate grasp location and width
-        bounding_boxes = [(228, 54, 259, 128), (9, 87, 40, 126), (230, 195, 268, 250), (29, 215, 45, 245)]
-        for bounding_box in bounding_boxes:
-            grasp_x, grasp_y, angle, grasp_width = self.calculate_grasp(q_img, ang_img, width_img, bounding_box)
+        # bounding_boxes = [(228, 54, 259, 128), (9, 87, 40, 126), (230, 195, 268, 250), (29, 215, 45, 245)]
+        # for bounding_box in bounding_boxes:
+        new_bbox = (self.bbox[0] - updated_top_corner[0], self.bbox[1] - updated_top_corner[1], self.bbox[2] - updated_top_corner[0], self.bbox[3] - updated_top_corner[1])
+        grasp_x, grasp_y, angle, grasp_width = self.calculate_grasp(q_img, ang_img, width_img, new_bbox)
 
-            # Check bounds and get depth at grasp point
-            if not (0 <= grasp_x < 300 and 0 <= grasp_y < 300):
-                print("Warning: Grasp coordinates are out of depth image bounds.")
-                return
-            point_depth = depth_resized[grasp_y, grasp_x]
-            if point_depth == 0:
-                print("Warning: Invalid depth at grasp point.")
-                return
+        # Check bounds and get depth at grasp point
+        if not (0 <= grasp_x < 300 and 0 <= grasp_y < 300):
+            print("Warning: Grasp coordinates are out of depth image bounds.")
+            return
+        
+        # point_depth = depth_resized[grasp_y, grasp_x]
+        # if point_depth == 0:
+        #     print("Warning: Invalid depth at grasp point.")
+        #     return
 
-            # Convert to 3D real-world coordinates
-            x = (grasp_x - self.cx) / self.fx * point_depth
-            y = (grasp_y - self.cy) / self.fy * point_depth
-            z = point_depth
+        grasp_x += updated_top_corner[0]
+        grasp_y += updated_top_corner[1]
+        point_depth = depth_image[grasp_y, grasp_x]
+        # Convert to 3D real-world coordinates
+        x = (grasp_x - self.cx) / self.fx * point_depth
+        y = (grasp_y - self.cy) / self.fy * point_depth
+        z = point_depth
+        self.show_grasp_on_image(depth_image, grasp_x, grasp_y, angle, grasp_width)
+
+        #now transform grasp point to world frame
+    #     grasp_point = np.array([x, y, z, 1])
+    #     t_matrix = np.eye(4)
+    #     # t_matrix = np.linalg.inv(self.camera_transformation_matrix)
+    #     # t_matrix = self.
+    # #     t_matrix = np.array([
+    # #     [0.001, -1.000, 0.000, 0.000],
+    # #     [0.825, 0.001, 0.565, 0.000],
+    # #     [-0.565, 0.000, 0.825, 1.350],
+    # #     [0.000, 0.000, 0.000, 1.000]
+    # # ])
+    #     # t_matrix = np.linalg.inv(t_matrix)  
+    #     world_grasp_point = np.dot(t_matrix, grasp_point)
+    #     world_grasp_point = world_grasp_point.astype(float)
+    #     angle = float(angle)
+    #     grasp_width = float(grasp_width)
+
+    #     # Publish grasp data
+    #     cmd_msg = Float32MultiArray()
+    #     # cmd_msg data should have 6d pose along with width
+    #     cmd_msg.data = [world_grasp_point[0], world_grasp_point[1], world_grasp_point[2], angle, 0.0, 0.0, grasp_width]
+    #     self.grasp_pub.publish(cmd_msg)
+
+        try:
+            print(f"Grasp point in camera frame: ({x}, {y}, {z})")
+            transform = self.tf_buffer.lookup_transform('world', 'camera_link_optical', rclpy.time.Time())
+            grasp_point = np.array([x, y, z, 1])
+            t_matrix = self.transform_to_matrix(transform)
+            world_grasp_point = np.dot(t_matrix, grasp_point)
+            print(f"Grasp point in world frame: {world_grasp_point}")
+
+            # Ensure all values are floats and within the valid range
+            world_grasp_point = world_grasp_point.astype(float)
+            angle = float(angle)
+            grasp_width = float(grasp_width)
 
             # Publish grasp data
             cmd_msg = Float32MultiArray()
-            cmd_msg.data = [float(x), float(y), float(z), float(angle), float(grasp_width)]
+            # cmd_msg data should have 6d pose along with width
+            cmd_msg.data = [world_grasp_point[0], world_grasp_point[1], world_grasp_point[2], angle, 0.0, 0.0, grasp_width]
             self.grasp_pub.publish(cmd_msg)
-            self.show_grasp_on_image(depth_resized, grasp_x, grasp_y, angle, grasp_width)
+        except tf2_ros.LookupException as e:
+            self.get_logger().error(f"Transform lookup failed: {e}")
+        except tf2_ros.ExtrapolationException as e:
+            self.get_logger().error(f"Transform extrapolation failed: {e}")
 
     def process_depth_image(self, depth, out_size=300, return_mask=False, crop_y_offset=0):
         
@@ -200,7 +313,7 @@ class GGCNNGraspNode(Node):
 
     def calculate_grasp(self, q_img, ang_img, width_img, bounding_box):
         # Only consider the center region of the image
-        q_img_temp = q_img[bounding_box[1]:bounding_box[3], bounding_box[0]:bounding_box[2]]
+        q_img_temp = q_img[bounding_box[1]:bounding_box[3], bounding_box[0]:2*(bounding_box[0] + bounding_box[2]) // 3]
         max_q_idx = np.unravel_index(np.argmax(q_img_temp), q_img_temp.shape)
         max_q_idx = (max_q_idx[0] + bounding_box[1], max_q_idx[1] + bounding_box[0])
         grasp_x, grasp_y = max_q_idx
