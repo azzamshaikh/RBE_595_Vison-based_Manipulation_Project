@@ -1,0 +1,13 @@
+# Request
+int32 bbox_min_x
+int32 bbox_min_y
+int32 bbox_max_x
+int32 bbox_max_y
+
+---
+# Response
+float32 x  # Grasp X in world coordinates
+float32 y  # Grasp Y in world coordinates
+float32 z  # Grasp Z in world coordinates
+float32 angle  # Grasp angle
+float32 width  # Grasp width
