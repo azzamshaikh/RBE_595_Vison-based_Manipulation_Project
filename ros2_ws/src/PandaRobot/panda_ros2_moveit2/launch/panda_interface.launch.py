@@ -225,7 +225,7 @@ def generate_launch_description():
     
     # Command-line argument: RVIZ file?
     rviz_arg = DeclareLaunchArgument(
-        "rviz_file", default_value="True", description="Load RVIZ file."
+        "rviz_file", default_value="False", description="Load RVIZ file."
     )
 
     # *** PLANNING CONTEXT *** #
