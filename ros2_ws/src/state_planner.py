@@ -5,6 +5,8 @@ import smach_ros
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
+# from smach_ros import IntrospectionServer
+from graphviz import Digraph
 
 class TakeImageState(smach.State):
     def __init__(self, node):
@@ -109,6 +111,50 @@ class OpenGripperState(smach.State):
         return 'success'
 
 
+# def generate_graph(state_machine):
+#     dot = Digraph(comment="State Machine Diagram")
+#     for state_name, state_data in state_machine.get_children().items():
+#         dot.node(state_name, state_name)
+#         for outcome, transition in state_data._transitions.items():
+#             if transition:
+#                 dot.edge(state_name, transition, label=outcome)
+#     dot.render("smach_state_machine", format="png", cleanup=True)
+#     print("State machine diagram saved as smach_state_machine.png")
+# def generate_graph(state_machine):
+#     dot = Digraph(comment="State Machine Diagram")
+    
+#     # Iterate over all states and their transitions
+#     for state_name, state_data in state_machine.get_children().items():
+#         dot.node(state_name, state_name)
+#         transitions = state_data.get_registered_outcomes()
+        
+#         # Use transitions from the StateMachine transitions table
+#         for outcome in transitions:
+#             next_state = state_machine.get_transition(state_name, outcome)
+#             if next_state:
+#                 dot.edge(state_name, next_state, label=outcome)
+
+#     dot.render("smach_state_machine", format="png", cleanup=True)
+#     print("State machine diagram saved as smach_state_machine.png")
+def generate_graph(state_machine):
+    dot = Digraph(comment="State Machine Diagram")
+    
+    # Iterate through the states and transitions
+    for state_name, state_data in state_machine.get_children().items():
+        dot.node(state_name, state_name)
+        
+        # Use the state machine's transition table to determine connections
+        transitions = state_machine._transitions.get(state_name, {})
+        for outcome, next_state in transitions.items():
+            if next_state:
+                dot.edge(state_name, next_state, label=outcome)
+
+    # Render the state machine diagram
+    dot.render("smach_state_machine", format="png", cleanup=True)
+    print("State machine diagram saved as smach_state_machine.png")
+
+
+
 def main(args=None):
     rclpy.init(args=args)
     node = rclpy.create_node('state_planner')
@@ -127,6 +173,12 @@ def main(args=None):
         smach.StateMachine.add('CLOSE_GRIPPER', CloseGripperState(node), transitions={'success': 'MOVE_TO_DROP_POSE', 'failure': 'aborted'})
         smach.StateMachine.add('MOVE_TO_DROP_POSE', MoveToDropPoseState(node), transitions={'success': 'OPEN_GRIPPER', 'failure': 'aborted'})
         smach.StateMachine.add('OPEN_GRIPPER', OpenGripperState(node), transitions={'success': 'completed', 'failure': 'aborted'})
+
+    # # Attach Introspection Server
+    # sis = IntrospectionServer('state_machine_server', sm, '/SM_ROOT')
+    # sis.start()
+
+    generate_graph(sm)
 
     # Execute SMACH plan
     outcome = sm.execute()
