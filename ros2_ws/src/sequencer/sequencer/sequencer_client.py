@@ -7,6 +7,8 @@ import time
 from sequencer_itf.action import Sequencer
 from rclpy.action import ActionClient
 
+from statemachine import State, StateMachine
+
 SEQ_RES = "null"
 
 class RobotActionClient(Node):
@@ -224,25 +226,109 @@ class RobotActionClient(Node):
         return self.command_list
 
 
+class ShelfPickingStateMachine(StateMachine):
+
+    def __init__(self, action_client:RobotActionClient):
+        super().__init__()
+        self.object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
+        self.object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
+        self.object3 = [0.1, 0.45, 0.6, 180.0,45.0,90.0]
+
+        self.objects = [self.object1,self.object2,self.object3]
+
+        self.grasp_pose = None
+        self.is_grasp_ready = False
+
+        self.is_done = False
+
+        self.action_client = action_client
+
+        self.actions_list = []
+
+        self.move_complete = False
+
+    home = State("home", initial=True)
+    sample_grasp = State("obtain_grasp_pose")
+    move = State("move")
+    done = State("done",final=True)
+
+    cycle = (home.to(sample_grasp, cond="objects_available") | 
+             sample_grasp.to(move, cond="grasp_received") | 
+             move.to(home, cond="motion_complete") | 
+             home.to(done, unless="objects_available")
+    )
+
+    # transitions 
+    def on_enter_sample_grasp(self):
+        # call ggcnn/capgrasp to get a grasp position
+        grasp_pose = self.objects.pop()
+        self.action_client.set_target_pose(grasp_pose)
+        self.actions_list = self.action_client.get_goals()
+        
+        self.is_grasp_ready = True
+        print("Trans: got the grasp pose")
+
+    def on_exit_sample_grasp(self):
+        print("Trans: go move")
+        self.is_grasp_ready = False
+
+    def on_enter_done(self):
+        print("Trans: State machine has reached the final state and is shutting down.")
+        self.is_done = True
+
+
+    def on_enter_move(self):
+        print("Trans: moving!")
+        for action in self.actions_list:
+            self.action_client.send_goal(action)
+            while self.action_client.status != GoalStatus.STATUS_SUCCEEDED:
+                rclpy.spin_once(self.action_client)
+        self.move_complete = True
+
+    def on_exit_move(self):
+        self.move_complete = False
+        
+
+    # Conditions
+    def objects_available(self):
+        # check if num of objects > 0 
+        print(f'Cond: objects are available. only {len(self.objects)} left.')
+        return len(self.objects) > 0
+
+    
+    def grasp_received(self):
+        print('Cond: grasp received')
+        return self.is_grasp_ready
+    
+    def motion_complete(self):
+        print('Cond: moving complete')
+        return self.move_complete
+
+
 def main(args=None):
     rclpy.init(args=args)
     action_client = RobotActionClient()
 
-    object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
-    object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
-    object3 = [0.1, 0.45, 0.6, 180.0,45.0,90.0]
+    sm = ShelfPickingStateMachine(action_client)
 
-    objects = [object1,object2,object3]
+    while not sm.is_done:
+        sm.cycle()
 
-    for obj in objects:
-        action_client.set_target_pose(obj)
-        actions = action_client.get_goals()
+    # object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
+    # object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
+    # object3 = [0.1, 0.45, 0.6, 180.0,45.0,90.0]
+
+    # objects = [object1,object2,object3]
+
+    # for obj in objects:
+    #     action_client.set_target_pose(obj)
+    #     actions = action_client.get_goals()
 
 
-        for action in actions:
-            action_client.send_goal(action)
-            while action_client.status != GoalStatus.STATUS_SUCCEEDED:
-                rclpy.spin_once(action_client)
+    #     for action in actions:
+    #         action_client.send_goal(action)
+    #         while action_client.status != GoalStatus.STATUS_SUCCEEDED:
+    #             rclpy.spin_once(action_client)
 
 
 
