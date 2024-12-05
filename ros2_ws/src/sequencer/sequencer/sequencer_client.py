@@ -1,13 +1,18 @@
 import rclpy
 from rclpy.node import Node
 import rclpy.time
-from std_msgs.msg import String, Float64MultiArray
+from std_msgs.msg import Int32, Int32MultiArray, Float64MultiArray
+from sensor_msgs.msg import Image, PointCloud2, CameraInfo
 from action_msgs.msg import GoalStatus
 import time
 from sequencer_itf.action import Sequencer
 from rclpy.action import ActionClient
+import numpy as np
 
 from statemachine import State, StateMachine
+from statemachine.contrib.diagram import DotGraphMachine
+
+
 
 SEQ_RES = "null"
 
@@ -37,6 +42,32 @@ class RobotActionClient(Node):
 
         self.goal_list = None
         self.command_list = []
+
+        self.bounding_box = None
+        self.bounding_box_sub = self.create_subscription(
+            Int32MultiArray,
+            "/yolo/prediction/bbox",
+            self.bounding_box_callback,
+            10
+        )
+
+        self.num_predictions = None
+        self.num_predictions = self.create_subscription(
+            Int32,
+            "/yolo/prediction/number_of_predictions",
+            self.num_predictions_callback,
+            10
+        )
+
+    def num_predictions_callback(self, msg:Int32):
+        self.num_predictions = msg.data
+
+    def bounding_box_callback(self, msg:Int32MultiArray):
+        # Save the bounding box [x_min, y_min, x_max, y_max]
+        self.bounding_box = np.array(msg.data)
+
+    def get_number_of_objects(self):
+        return self.num_predictions
 
 
     def send_goal(self, commands):
@@ -72,7 +103,7 @@ class RobotActionClient(Node):
         
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info(f'Feedback : {feedback.feedback}')
+        #self.get_logger().info(f'Feedback : {feedback.feedback}')
 
 
     def set_target_pose(self, data):
@@ -154,7 +185,7 @@ class RobotActionClient(Node):
                         action["speed"]]
 
         msg.data = commands
-        self.get_logger().info(f"Published action: {action['action']}")
+        #self.get_logger().info(f"Published action: {action['action']}")
         return commands
     
     
@@ -224,6 +255,11 @@ class RobotActionClient(Node):
         for action in self.shelf_sequence:
             self.command_list.append(action())
         return self.command_list
+    
+
+class GraspManager(Node):
+    pass
+
 
 
 class ShelfPickingStateMachine(StateMachine):
@@ -247,21 +283,27 @@ class ShelfPickingStateMachine(StateMachine):
 
         self.move_complete = False
 
+        self.no_more_objects = False
+
     home = State("home", initial=True)
+    yolo = State("yolo")
     sample_grasp = State("obtain_grasp_pose")
     move = State("move")
     done = State("done",final=True)
 
-    cycle = (home.to(sample_grasp, cond="objects_available") | 
+    cycle = (home.to(yolo) |
+             yolo.to.itself(cond="not objects_available and not sequence_complete") |
+             yolo.to(sample_grasp, cond="objects_available") | 
+
              sample_grasp.to(move, cond="grasp_received") | 
-             move.to(home, cond="motion_complete") | 
-             home.to(done, unless="objects_available")
+             move.to(yolo, cond="motion_complete") | 
+             yolo.to(done, cond="sequence_complete")
     )
 
-    # transitions 
+    # transitions
     def on_enter_sample_grasp(self):
         # call ggcnn/capgrasp to get a grasp position
-        grasp_pose = self.objects.pop()
+        grasp_pose = self.objects[0]
         self.action_client.set_target_pose(grasp_pose)
         self.actions_list = self.action_client.get_goals()
         
@@ -276,7 +318,6 @@ class ShelfPickingStateMachine(StateMachine):
         print("Trans: State machine has reached the final state and is shutting down.")
         self.is_done = True
 
-
     def on_enter_move(self):
         print("Trans: moving!")
         for action in self.actions_list:
@@ -287,13 +328,22 @@ class ShelfPickingStateMachine(StateMachine):
 
     def on_exit_move(self):
         self.move_complete = False
-        
+        rclpy.spin_once(self.action_client)
+        val = self.action_client.get_number_of_objects()
+        if val == 0:
+            self.no_more_objects = True
 
     # Conditions
     def objects_available(self):
         # check if num of objects > 0 
-        print(f'Cond: objects are available. only {len(self.objects)} left.')
-        return len(self.objects) > 0
+        print(f'Cond - Camera: {self.action_client.get_number_of_objects()}')
+        rclpy.spin_once(self.action_client)
+        val = 0
+        val = self.action_client.get_number_of_objects()
+        if type(val) != int:
+            val = 0
+
+        return val > 0
 
     
     def grasp_received(self):
@@ -304,12 +354,22 @@ class ShelfPickingStateMachine(StateMachine):
         print('Cond: moving complete')
         return self.move_complete
 
+    def sequence_complete(self):
+        print("Cond: no more objects")
+        return self.no_more_objects
+    
 
 def main(args=None):
     rclpy.init(args=args)
     action_client = RobotActionClient()
 
     sm = ShelfPickingStateMachine(action_client)
+
+    graph = DotGraphMachine(sm)
+
+    dot = graph()
+
+    dot.write_png("graph.png")
 
     while not sm.is_done:
         sm.cycle()
