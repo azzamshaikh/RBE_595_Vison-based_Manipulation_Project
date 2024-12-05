@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, Command
 from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument, TimerAction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
@@ -86,6 +86,44 @@ def generate_launch_description():
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'panda'],
                         output='screen')
+    
+
+    camera_description_path = os.path.join(
+        get_package_share_directory('panda_ros2_gazebo')
+    )
+    # camera_file = os.path.join(camera_description_path,
+    #                                  'urdf',
+    #                                  'camera.urdf')
+    # camera_doc = open(camera_file).read()
+    # camera_description = {'robot_description': camera_doc}
+    # camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
+    #                     arguments=['-file',camera_file,
+    #                                '-entity', 'camera',
+    #                                '-x', '0.0',
+    #                                '-y', '0.0',
+    #                                '-z', '1.35',
+    #                                '-R', '0.0',
+    #                                '-P', '0.6',
+    #                                '-Y', '1.57'],
+    #                     output='both')
+
+    camera_xacro = os.path.join(camera_description_path,
+                                'urdf',
+                                'camera.urdf.xacro')
+    camera_doc = xacro.parse(open(camera_xacro))
+    xacro.process_doc(camera_doc)
+    camera_description_config = camera_doc.toxml()
+    camera_description = {'robot_description':camera_description_config}
+    camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
+                        arguments=['-topic','robot_description',
+                                   '-entity', 'camera'],
+                                #    '-x', '0.0',
+                                #    '-y', '0.0',
+                                #    '-z', '1.35',
+                                #    '-R', '0.0',
+                                #    '-P', '0.6',
+                                #    '-Y', '1.57'],
+                        output='screen')
 
     # ***** STATIC TRANSFORM ***** #
     # NODE -> Static TF:
@@ -103,6 +141,54 @@ def generate_launch_description():
         output='both',
         parameters=[
             robot_description,
+            {"use_sim_time": True}
+        ]
+    )
+
+    # static_tf = Node(
+    #     package="tf2_ros",
+    #     executable="static_transform_publisher",
+    #     name="camera_transform",
+    #     output="log",
+    #     arguments=[
+    #         # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
+    #         "0.0",
+    #         "0.0",
+    #         "1.35",
+    #         "0.0",
+    #         "0.6",
+    #         "1.57",
+    #         "world",
+    #         "camera_link_optical"
+    #     ]
+    # )
+
+    camera_static_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="camera_transform_publisher",
+        output="log",
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+        # [
+        #     # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
+        #     "0.0",
+        #     "0.0",
+        #     "1.35",
+        #     "0.0",
+        #     "0.6",
+        #     "1.57",
+        #     "world",
+        #     "camera_link"
+        # ]
+    )
+
+    camera_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='camera_state_publisher',
+        output='both',
+        parameters=[
+            camera_description,
             {"use_sim_time": True}
         ]
     )
@@ -295,11 +381,14 @@ def generate_launch_description():
     return LaunchDescription(
         [
             # Gazebo nodes:
-            gazebo, 
+            gazebo,
             spawn_entity,
             # ROS2_CONTROL:
             static_tf,
             robot_state_publisher,
+            camera_spawn,
+            camera_static_tf,
+            camera_state_publisher,
             
             # ROS2 Controllers:
             RegisterEventHandler(

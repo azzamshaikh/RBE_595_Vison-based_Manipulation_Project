@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <light name='user_point_light_0' type='point'>
+      <pose>0 0 1.5 0 0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>
+
+    <!-- <include>
+      <uri>model://table</uri>
+      <pose>1.0 0 -0.5 0 0 -1.57</pose>
+    </include> -->
+
+    <include>
+      <uri>model://bookshelf</uri>
+      <pose>0.8 0 0 0 0 -1.57</pose>
+    </include>
+
+    <!-- <include>
+      <name>crackerbox1</name>
+      <uri>model://cracker_box</uri>
+      <pose>0.75 0.1 0.51 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>crackerbox2</name>
+      <uri>model://cracker_box</uri>
+      <pose>0.85 0.1 0.51 0 0 3.14</pose>
+    </include>
+
+
+    <include>
+      <name>crackerbox3</name>
+      <uri>model://cracker_box</uri>
+      <pose>0.95 0.1 0.51 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>gelatinbox1</name>
+      <uri>model://gelatin_box</uri>
+      <pose>0.75 -0.5 0.51 0 0 3.4</pose>
+    </include>
+
+    <include>
+      <name>gelatinbox2</name>
+      <uri>model://gelatin_box</uri>
+      <pose>0.85 -0.5 0.51 0 0 3.4</pose>
+    </include>
+
+    <include>
+      <name>gelatinbox3</name>
+      <uri>model://gelatin_box</uri>
+      <pose>0.95 -0.5 0.51 0 0 3.4</pose>
+    </include> -->
+
+    <include>
+      <name>sugar1</name>
+      <uri>model://sugar_box</uri>
+      <pose>0.45 0.26 0.44 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>sugar1_top_shelf</name>
+      <uri>model://chips_can</uri>
+      <pose>0.45 0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>sugar2</name>
+      <uri>model://sugar_box</uri>
+      <pose>0.55 0.26 0.44 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>sugar2_top_shelf</name>
+      <uri>model://coke_can</uri>
+      <pose>0.55 0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>sugar3</name>
+      <uri>model://sugar_box</uri>
+      <pose>0.65 0.26 0.44 0 0 3.14</pose>
+    </include>
+
+
+    <include>
+      <name>sugar3_top_shelf</name>
+      <uri>model://gelatin_box</uri>
+      <pose>0.65 0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato1</name>
+      <uri>model://tomato_soup_can</uri>
+      <pose>0.45 -0.26 0.44 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato1_top_shelf</name>
+      <uri>model://cracker_box</uri>
+      <pose>0.45 -0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato2</name>
+      <uri>model://tomato_soup_can</uri>
+      <pose>0.55 -0.26 0.44 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato2_top_shelf</name>
+      <uri>model://bowl</uri>
+      <pose>0.55 -0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato3</name>
+      <uri>model://tomato_soup_can</uri>
+      <pose>0.65 -0.26 0.44 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>tomato3_top_shelf</name>
+      <uri>model://tomato_soup_can</uri>
+      <pose>0.65 -0.26 0.81 0 0 3.14</pose>
+    </include>
+
+    <scene>
+      <shadows>0</shadows>
+    </scene>
+
+    <!-- GAZEBO PLUGINS: -->
+    <!-- The following plugins must be activated for the ros2_grasping to effectively work: -->
+
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/ros2_grasp</namespace>
+        <argument>model_states:=model_states</argument>
+        <argument>link_states:=link_states</argument>
+      </ros>
+      <update_rate>1.0</update_rate>
+    </plugin>
+
+    <plugin name="gazebo_ros_properties" filename="libgazebo_ros_properties.so">
+      <ros>
+        <namespace>/ros2_grasp</namespace>
+      </ros>
+    </plugin>
+
+  </world>
+</sdf>

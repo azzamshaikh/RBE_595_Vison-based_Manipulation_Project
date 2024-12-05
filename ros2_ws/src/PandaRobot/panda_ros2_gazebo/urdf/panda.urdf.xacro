@@ -27,15 +27,17 @@
   <!-- PANDA ROBOT alone: -->
   <xacro:if value="${cell_layout_1}">
     <joint name="world-base_link-fixed" type="fixed">
+      <org xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <parent link="world"/>
       <child link="panda_link0"/>
     </joint>
 
-    <joint name="world-camera_link-fixed" type="fixed">
-      <origin xyz="0 0 0.75" rpy="0 0 3.14"/>
+    <!-- <joint name="world-camera_link-fixed" type="fixed">
+      <origin xyz="0 0 1.5" rpy="0 0.6 3.14"/>
+      <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
       <parent link="world"/>
       <child link="camera_link"/>
-    </joint>
+    </joint> -->
   </xacro:if>
 
 </robot>
