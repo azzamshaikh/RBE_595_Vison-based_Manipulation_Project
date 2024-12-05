@@ -304,6 +304,12 @@ def generate_launch_description():
         condition=UnlessCondition(load_RVIZfile),
     )
 
+    table_collision_node = Node(
+        package="panda_ros2_gazebo",
+        executable="table_collision.py",
+        name="table_collision_node"
+    )
+
     # *********************** ROS2.0 Robot/End-Effector Actions/Triggers *********************** #
     # MoveJ ACTION:
     moveJ_interface = Node(
@@ -437,6 +443,15 @@ def generate_launch_description():
                                 rviz_node_full,
                                 run_move_group_node
                             ]
+                        ),
+
+                        # Table Collision
+                        TimerAction(
+                            period=5.0,
+                            actions=[
+                                table_collision_node
+                            ]
+
                         ),
 
                         # ROS2.0 Actions:
