@@ -22,6 +22,10 @@ import rclpy
 from rclpy.node import Node
 from capgrasp_itf.srv import CAPGrasp
 
+from sensor_msgs.msg import PointCloud2
+from rclpy.executors import MultiThreadedExecutor
+import ros2_numpy
+
 
 def setup_args():
     parser = argparse.ArgumentParser(
@@ -213,9 +217,25 @@ class CAPGraspService(Node):
 
     def __init__(self):
         super().__init__("capgrasp_service")
-        self.srv = self.create_service(CAPGrasp, "capgrasp_srv_cli", self.grasp_pose_callback)
+        self.pc = None
+        self.pointcloud_sub = self.create_subscription(PointCloud2,'/processed_object',self.pointcloud_callback,1)
+        self.get_logger().info("Created subscriber")
 
-    def grasp_pose_callback(self, request, response):
+        self.srv = self.create_service(CAPGrasp, "capgrasp_srv_cli", self.grasp_pose_callback)
+        self.get_logger().info("Created service")
+
+
+
+    def pointcloud_callback(self, msg:PointCloud2):
+        pc_array = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)
+        xyz = pc_array['xyz']
+        self.pc = xyz        
+        self.get_logger().info(f"Shape of xyz is {xyz.shape}")
+
+    def get_pointcloud(self):
+        return self.pc
+
+    async def grasp_pose_callback(self, request, response):
         if request.start is True:
             self.get_logger().info("Request received!")
 
@@ -236,9 +256,11 @@ class CAPGraspService(Node):
         # initialize the constrained refinement framework
         EvaluatorNetwork = RefineNN(grasp_scoring_network)
 
+        self.get_logger().info("getting pcd")
         # prepare the point cloud, (load the demo point cloud here)
-        pcd_dir = "/home/azzam/RBE_595_Group_Project/ros2_ws/src/capgrasp_srv_cli/capgrasp_srv_cli/demo/output_full_sugar_box_inliers.pcd"
-        pcd_pc = np.array(o3d.io.read_point_cloud(pcd_dir).points)
+        # pcd_dir = "/home/azzam/RBE_595_Group_Project/ros2_ws/src/capgrasp_srv_cli/capgrasp_srv_cli/demo/output_full_sugar_box_inliers.pcd"
+        # pcd_pc = np.array(o3d.io.read_point_cloud(pcd_dir).points)
+        pcd_pc = self.get_pointcloud()
         pcd_downsample = np.expand_dims(pcd_pc[np.random.choice(pcd_pc.shape[0], 1024)], axis=0)
         pc_mean = pcd_downsample.mean(axis=1)
         regularized_pcd_downsample = pcd_downsample - pc_mean
@@ -331,6 +353,16 @@ def main():
     rclpy.init()
 
     service = CAPGraspService()
+
+    executor = MultiThreadedExecutor()
+    executor.add_node(service)
+
+    try:
+        executor.spin()
+    finally:
+        executor.shutdown()
+        service.destroy_node()
+        rclpy.shutdown()
 
     rclpy.spin(service)
 
