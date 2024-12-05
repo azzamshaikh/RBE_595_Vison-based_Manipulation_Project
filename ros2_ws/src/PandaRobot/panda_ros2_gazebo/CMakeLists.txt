@@ -17,6 +17,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -42,5 +43,11 @@ install(
   DESTINATION 
     share/${PROJECT_NAME}
 )
+install(
+  PROGRAMS
+  panda_ros2_gazebo/table_collision.py  
+  DESTINATION lib/${PROJECT_NAME}     
+)
+# ament_python_install_package(${PROJECT_NAME})
 
 ament_package()
