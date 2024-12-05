@@ -6,6 +6,7 @@ from sensor_msgs.msg import Image, PointCloud2, CameraInfo
 from action_msgs.msg import GoalStatus
 import time
 from sequencer_itf.action import Sequencer
+from capgrasp_itf.srv import CAPGrasp
 from rclpy.action import ActionClient
 import numpy as np
 
@@ -257,14 +258,24 @@ class RobotActionClient(Node):
         return self.command_list
     
 
-class GraspManager(Node):
-    pass
+class GraspClient(Node):
+
+    def __init__(self):
+        super().__init__('capgrasp_client')
+        self.cli = self.create_client(CAPGrasp, 'capgrasp_srv_cli')
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available. waiting again...')
+        self.req = CAPGrasp.Request()
+
+    def send_request(self):
+        self.req.start = True
+        self.future = self.cli.call_async(self.req)
 
 
 
 class ShelfPickingStateMachine(StateMachine):
 
-    def __init__(self, action_client:RobotActionClient):
+    def __init__(self, action_client:RobotActionClient, grasp_client:GraspClient):
         super().__init__()
         self.object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
         self.object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
@@ -278,6 +289,7 @@ class ShelfPickingStateMachine(StateMachine):
         self.is_done = False
 
         self.action_client = action_client
+        self.grasp_client = grasp_client
 
         self.actions_list = []
 
@@ -303,8 +315,21 @@ class ShelfPickingStateMachine(StateMachine):
     # transitions
     def on_enter_sample_grasp(self):
         # call ggcnn/capgrasp to get a grasp position
-        grasp_pose = self.objects[0]
-        self.action_client.set_target_pose(grasp_pose)
+        self.grasp_client.send_request()
+
+        while rclpy.ok():
+            rclpy.spin_once(self.grasp_client)
+            self.grasp_client.get_logger().info('Waiting for result...')
+            if self.grasp_client.future.done():
+                response = self.grasp_client.future.result()
+                pose = response.xyz.tolist()
+                self.grasp_client.get_logger().info(f"grasp pose is {response.xyz.tolist()}")
+                break
+        pose.append(180.0)
+        pose.append(45.0)
+        pose.append(90.0)
+        #grasp_pose = self.objects[0]
+        self.action_client.set_target_pose(pose)
         self.actions_list = self.action_client.get_goals()
         
         self.is_grasp_ready = True
@@ -362,8 +387,10 @@ class ShelfPickingStateMachine(StateMachine):
 def main(args=None):
     rclpy.init(args=args)
     action_client = RobotActionClient()
+    grasp_client = GraspClient()
 
-    sm = ShelfPickingStateMachine(action_client)
+    sm = ShelfPickingStateMachine(action_client,
+                                  grasp_client)
 
     graph = DotGraphMachine(sm)
 

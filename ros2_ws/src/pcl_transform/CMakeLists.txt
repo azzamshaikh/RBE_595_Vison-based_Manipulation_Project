@@ -36,6 +36,10 @@ target_link_libraries(camera_to_world ${PCL_LIBRARIES} ${tf2_ros_LIBRARIES} ${tf
 add_executable(downsample src/downsample.cpp)
 target_link_libraries(downsample ${PCL_LIBRARIES} ${tf2_ros_LIBRARIES} ${tf2_eigen_LIBRARIES})
 
+
+add_executable(segmentation_process src/segmentation_process.cpp)
+target_link_libraries(segmentation_process ${PCL_LIBRARIES} ${tf2_ros_LIBRARIES} ${tf2_eigen_LIBRARIES})
+
 ament_target_dependencies(
   camera_to_world
   rclcpp
@@ -48,6 +52,16 @@ ament_target_dependencies(
 
 ament_target_dependencies(
   downsample
+  rclcpp
+  std_msgs
+  sensor_msgs
+  pcl_conversions
+  tf2_ros
+  tf2_eigen  
+)
+
+ament_target_dependencies(
+  segmentation_process
   rclcpp
   std_msgs
   sensor_msgs
@@ -60,6 +74,7 @@ ament_target_dependencies(
 install(TARGETS
   camera_to_world
   downsample
+  segmentation_process
   DESTINATION lib/${PROJECT_NAME}
 )
 

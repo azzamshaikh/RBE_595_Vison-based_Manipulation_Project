@@ -15,7 +15,7 @@ from geometry_msgs.msg import Point
 from tf2_ros import TransformListener, Buffer
 from geometry_msgs.msg import TransformStamped
 import tf_transformations
-#import open3d as o3d
+import open3d as o3d
 
 
 class PointCloudExtractor(Node):
@@ -158,7 +158,7 @@ class PointCloudExtractor(Node):
         self.pointcloud_kd_tree = KDTree(xyz)
         # point_cloud = o3d.geometry.PointCloud()
         # point_cloud.points = o3d.utility.Vector3dVector(np.array(self.pointcloud))
-        # o3d.io.write_point_cloud("output_full.pcd", point_cloud)
+        # o3d.io.write_point_cloud("output_full_sugar_box.pcd", point_cloud)
         # self.get_logger().info("Saved")
         # self.break_flag_ = True
     
@@ -328,8 +328,8 @@ class PointCloudExtractor(Node):
         extraction = pc2.create_cloud(header,fields,points)
 
         # point_cloud = o3d.geometry.PointCloud()
-        # point_cloud.points = o3d.utility.Vector3dVector(np.array(transformed_full))
-        # o3d.io.write_point_cloud("output_full.pcd", point_cloud)
+        # point_cloud.points = o3d.utility.Vector3dVector(np.array(transformed_points))
+        # o3d.io.write_point_cloud("output_full_sugar_box.pcd", point_cloud)
         # self.get_logger().info("Saved")
         # self.break_flag_ = True
 
