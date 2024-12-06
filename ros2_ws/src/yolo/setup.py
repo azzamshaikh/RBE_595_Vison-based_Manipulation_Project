@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "object_segmentation = yolo.object_detection:main",
+            "object_detection = yolo.object_detection:main",
         ],
     },
 )
