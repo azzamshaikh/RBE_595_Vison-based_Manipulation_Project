@@ -230,7 +230,7 @@ class CAPGraspService(Node):
         pc_array = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)
         xyz = pc_array['xyz']
         self.pc = xyz        
-        self.get_logger().info(f"Shape of xyz is {xyz.shape}")
+        #self.get_logger().info(f"Shape of xyz is {xyz.shape}")
 
     def get_pointcloud(self):
         return self.pc

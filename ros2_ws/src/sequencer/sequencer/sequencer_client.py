@@ -503,8 +503,14 @@ class ShelfPickingStateMachine(StateMachine):
 def main(args=None):
     rclpy.init(args=args)
     action_client = RobotActionClient()
+
+    action_client.declare_parameter('grasp_type','default')
+    grasp_type= action_client.get_parameter('grasp_type').value
+    
+    #grasp_type = "capgrasp" # options - "capgrasp", "ggcnn" (NOT IMPLEMENTED), "default"
+    
     grasp_client = GraspClient()
-    grasp_type = "capgrasp" # options - "capgrasp", "ggcnn" (NOT IMPLEMENTED), "default"
+    
     sm = ShelfPickingStateMachine(action_client,
                                   grasp_client,
                                   grasp_type)
