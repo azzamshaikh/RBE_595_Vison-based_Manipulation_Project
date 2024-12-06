@@ -13,6 +13,7 @@ from ros2_data.action import MoveXYZW
 from ros2_data.action import MoveXYZ
 from ros2_data.action import MoveG
 from ros2_data.action import MoveJs
+from ros2_data.action import MoveL
 from ros2_data.msg import JointPoseS
 from ros2_grasping.action import Attacher 
 import ast
@@ -44,6 +45,7 @@ class Controller(Node):
         self.MoveXYZW_CLIENT = MoveXYZWclient()
         self.MoveXYZ_CLIENT = MoveXYZclient()
         self.MoveJs_CLIENT = MoveJsclient()
+        self.MoveL_CLIENT = MoveLclient()
 
         # self.nodeLOG = rclpy.create_node('node_LOG')
 
@@ -88,6 +90,18 @@ class Controller(Node):
                         'value' : joints,
                         'speed' :input[8]
             }
+        elif input[0] == 6.0:
+            pose = {'movex':input[1],
+                    'movey':input[2],
+                    'movez':input[3],
+            }
+            commands = {
+                        'action': "MoveL",
+                        'value' : pose,
+                        'speed' :input[4]
+            }
+
+
 
         return commands
 
@@ -222,6 +236,40 @@ class Controller(Node):
             else:
                 print("MoveJs ACTION in step number -> " + str(i) + " failed.")
                 print("The program will be closed. Bye!")
+
+        elif (trigger['action'] == 'MoveL'):
+            
+            print("")
+            print("STEP NUMBER " + str(i) + " -> MoveL:")
+            print(trigger['value'])
+
+            # Joint SPEED:
+            JointSPEED = trigger['speed']
+            if (JointSPEED <= 0 or JointSPEED > 1):
+                print ("Joint speed -> " + str(JointSPEED) + " not valid. Must be (0,1]. Assigned: 0.01")
+                JointSPEED = 0.01
+            else:
+                print("Joint speed -> " + str(JointSPEED))
+
+            MoveX = trigger['value']['movex']
+            MoveY = trigger['value']['movey']
+            MoveZ = trigger['value']['movez']
+            self.MoveL_CLIENT.send_goal(MoveX,MoveY,MoveZ, JointSPEED)
+            
+            while rclpy.ok():
+                rclpy.spin_once(self.MoveL_CLIENT)
+                if (RES != "null"):
+                    break
+            
+            print ("Result of MoveL ACTION CALL is -> { " + RES + " }")
+            
+            if (RES == "MoveL:SUCCESS"):
+                print("MoveL ACTION in step number -> " + str(i) + " successfully executed.")
+                RES = "null"
+            else:
+                print("MoveL ACTION in step number -> " + str(i) + " failed.")
+                print("The program will be closed. Bye!")
+
 
         elif (trigger['action'] == 'Attach'):
             
@@ -525,6 +573,52 @@ class MoveJsclient(Node):
         # 1. Assign FEEDBACK variable:
         feedback = feedback_msg.feedback
         # NO FEEDBACK NEEDED IN MoveJs ACTION CALL.
+
+# 2. MoveL:
+class MoveLclient(Node):
+    
+    def __init__(self):
+        # 1. Initialise node:
+        super().__init__('MoveL_client')
+        self._action_client = ActionClient(self, MoveL, 'MoveL')
+        # 2. Wait for MoveL server to be available:
+        print ("Waiting for MoveL action server to be available...")
+        self._action_client.wait_for_server()
+        print ("MoveL ACTION SERVER detected.")
+    
+    def send_goal(self, GoalLx, GoalLy, GoalLz, JointSPEED):
+        # 1. Assign variables:
+        goal_msg = MoveL.Goal()
+        goal_msg.movex = GoalLx
+        goal_msg.movey = GoalLy
+        goal_msg.movez = GoalLz
+        goal_msg.speed = JointSPEED
+        # 2. ACTION CALL:
+        self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
+
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected :(')
+            return
+        self.get_logger().info('Goal accepted :)')
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.get_result_callback)
+    
+    def get_result_callback(self, future):
+        global RES
+        # 1. Assign RESULT variable:
+        result = future.result().result
+        RES = result.result
+        # 2. Print RESULT:
+        print ("MoveL ACTION CALL finished.")       
+
+    def feedback_callback(self, feedback_msg):
+        # 1. Assign FEEDBACK variable:
+        feedback = feedback_msg.feedback
+        # NO FEEDBACK NEEDED IN MoveL ACTION CALL.
+
 
 
 def main(args=None):

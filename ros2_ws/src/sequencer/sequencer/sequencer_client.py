@@ -27,7 +27,8 @@ class RobotActionClient(Node):
         # Target pose placeholder
         self.target_pose = None
 
-        self.shelf_sequence = [self.open_gripper, 
+        self.shelf_sequence = [self.open_gripper,
+                               self.go_to_pregrasp, 
                                self.go_to_grasp,
                                self.close_gripper,
                                self.attach_object,
@@ -184,6 +185,12 @@ class RobotActionClient(Node):
                         action["value"]["joint6"],
                         action["value"]["joint7"],
                         action["speed"]]
+        elif action["action"] == "MoveL":
+            commands = [6.0,
+                        action["value"]["movex"],
+                        action["value"]["movey"],
+                        action["value"]["movez"],
+                        action["speed"]]
 
         msg.data = commands
         #self.get_logger().info(f"Published action: {action['action']}")
@@ -226,16 +233,39 @@ class RobotActionClient(Node):
         commands = self.publish_action(dettach)
         return commands
     
-    def go_to_grasp(self):
+    def go_to_pregrasp(self):
         grasp_action = {
             "action": "MoveXYZW",
             "value": {
                 "positionx": self.target_pose["positionx"],
-                "positiony": self.target_pose["positiony"],
+                "positiony": self.target_pose["positiony"] - 0.1,
                 "positionz": self.target_pose["positionz"],
                 "yaw": self.target_pose["yaw"],
                 "pitch": self.target_pose["pitch"],
                 "roll": self.target_pose["roll"]
+            },
+            "speed": 0.5
+        }
+        commands = self.publish_action(grasp_action)
+        return commands
+    
+    def go_to_grasp(self):
+        grasp_action = {
+            # "action": "MoveXYZW",
+            # "value": {
+            #     "positionx": self.target_pose["positionx"],
+            #     "positiony": self.target_pose["positiony"],
+            #     "positionz": self.target_pose["positionz"],
+            #     "yaw": self.target_pose["yaw"],
+            #     "pitch": self.target_pose["pitch"],
+            #     "roll": self.target_pose["roll"]
+            # },
+            # "speed": 0.5
+            "action": "MoveL",
+            "value": {
+                "movex": 0.0,
+                "movey": 0.1,
+                "movez": 0.0,
             },
             "speed": 0.5
         }
@@ -275,7 +305,7 @@ class GraspClient(Node):
 
 class ShelfPickingStateMachine(StateMachine):
 
-    def __init__(self, action_client:RobotActionClient, grasp_client:GraspClient):
+    def __init__(self, action_client:RobotActionClient, grasp_client:GraspClient, grasp_type:str):
         super().__init__()
         self.object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
         self.object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
@@ -294,6 +324,20 @@ class ShelfPickingStateMachine(StateMachine):
         self.actions_list = []
 
         self.move_complete = False
+
+        if grasp_type == "capgrasp":
+            self.grasp_type = grasp_type
+            self.action_client.get_logger().info("Using " + grasp_type + " for grasping!")
+        elif grasp_type == "ggcnn":
+            self.grasp_type = "default"
+            self.action_client.get_logger().info("Using " + grasp_type + " for grasping!")
+        elif grasp_type == "default":
+            self.grasp_type = grasp_type
+            self.action_client.get_logger().info("Using hard-coded value for grasping!")
+        else:
+            self.grasp_type = "default"
+            self.action_client.get_logger().info("Using hard-coded value for grasping!")
+
 
         self.no_more_objects = False
 
@@ -315,20 +359,27 @@ class ShelfPickingStateMachine(StateMachine):
     # transitions
     def on_enter_sample_grasp(self):
         # call ggcnn/capgrasp to get a grasp position
-        self.grasp_client.send_request()
+        if self.grasp_type == "capgrasp":
+            self.grasp_client.send_request()
 
-        while rclpy.ok():
-            rclpy.spin_once(self.grasp_client)
-            self.grasp_client.get_logger().info('Waiting for result...')
-            if self.grasp_client.future.done():
-                response = self.grasp_client.future.result()
-                pose = response.xyz.tolist()
-                self.grasp_client.get_logger().info(f"grasp pose is {response.xyz.tolist()}")
-                break
-        pose.append(180.0)
-        pose.append(45.0)
-        pose.append(90.0)
-        #grasp_pose = self.objects[0]
+            while rclpy.ok():
+                rclpy.spin_once(self.grasp_client)
+                self.grasp_client.get_logger().info('Waiting for result...')
+                if self.grasp_client.future.done():
+                    response = self.grasp_client.future.result()
+                    pose = response.xyz.tolist()
+                    self.grasp_client.get_logger().info(f"grasp pose is {response.xyz.tolist()}")
+                    break
+            pose.append(180.0)
+            pose.append(45.0)
+            pose.append(90.0)
+        elif self.grasp_type == "ggcnn":
+            raise NotImplementedError
+        elif self.grasp_type == "default":
+            pose = self.objects[0]
+        else:
+            pose = self.objects[0]
+        
         self.action_client.set_target_pose(pose)
         self.actions_list = self.action_client.get_goals()
         
@@ -388,9 +439,10 @@ def main(args=None):
     rclpy.init(args=args)
     action_client = RobotActionClient()
     grasp_client = GraspClient()
-
+    grasp_type = "capgrasp" # options - "capgrasp", "ggcnn" (NOT IMPLEMENTED), "default"
     sm = ShelfPickingStateMachine(action_client,
-                                  grasp_client)
+                                  grasp_client,
+                                  grasp_type)
 
     graph = DotGraphMachine(sm)
 
