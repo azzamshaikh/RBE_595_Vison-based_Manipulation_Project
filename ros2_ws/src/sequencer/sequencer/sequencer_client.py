@@ -366,11 +366,17 @@ class GraspClient(Node):
         self.req.start = True
         self.future = self.cli.call_async(self.req)
 
+class GGCNN(Node):
+    def __init__(self):
+        super().__init__('ggcnn_client')
+        raise NotImplementedError
 
+    def send_request(self):
+        raise NotImplementedError
 
 class ShelfPickingStateMachine(StateMachine):
 
-    def __init__(self, action_client:RobotActionClient, grasp_client:GraspClient, grasp_type:str):
+    def __init__(self, action_client:RobotActionClient, grasp_type:str, grasp_client:GraspClient = None):
         super().__init__()
         self.object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
         self.object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]
@@ -508,12 +514,23 @@ def main(args=None):
     grasp_type= action_client.get_parameter('grasp_type').value
     
     #grasp_type = "capgrasp" # options - "capgrasp", "ggcnn" (NOT IMPLEMENTED), "default"
+    if grasp_type == "capgrasp":
+        grasp_client = GraspClient()
     
-    grasp_client = GraspClient()
-    
-    sm = ShelfPickingStateMachine(action_client,
-                                  grasp_client,
-                                  grasp_type)
+        sm = ShelfPickingStateMachine(action_client,
+                                    grasp_type,
+                                    grasp_client)
+    elif grasp_type == "ggcnn":
+        grasp_client = GGCNN()
+
+        sm = ShelfPickingStateMachine(action_client,
+                                    grasp_type,
+                                    grasp_client)
+    elif grasp_type == "default":
+        sm = ShelfPickingStateMachine(action_client,
+                                    grasp_type,
+                                    )
+        
 
     graph = DotGraphMachine(sm)
 

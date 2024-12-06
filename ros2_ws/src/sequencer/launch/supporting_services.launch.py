@@ -12,6 +12,12 @@ import yaml
 
 
 def generate_launch_description():
+    enable_node_arg = DeclareLaunchArgument(
+        'enable_capgrasp',
+        default_value='true',  # Default is false
+        description='Enable or disable the node. Set to "true" or "false".'
+    )
+
     attacher = Node(
         package="ros2_grasping",
         executable="attacher_action.py",
@@ -23,7 +29,8 @@ def generate_launch_description():
         package="capgrasp_srv_cli",
         executable="grasp_service",
         name="grasp_service",
-        output="log"
+        output="log",
+        condition=IfCondition(LaunchConfiguration('enable_capgrasp'))
     )
 
     controller = Node(
@@ -36,6 +43,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            enable_node_arg,
             attacher,
             capgrasp_srv,
             controller

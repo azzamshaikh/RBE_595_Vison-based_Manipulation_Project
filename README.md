@@ -8,15 +8,32 @@ In a terminal, build and source the workspace and run
 ```
 ros2 launch panda_ros2_moveit2 panda_interface.launch.py
 ```
+This will launch Gazebo and spawn all objects and controllers. RVIZ will also open.
 
-## Launch attacher action
+## Launch Object Perception
 In a new terminal, source the workspace and run
 ```
-ros2 run ros2_grasping attacher_action.py
+ros2 launch pcl_transform object_perception.launch.py
 ```
+This will launch YOLO and add pointcloud data to RVIZ.
 
-## Launch motion
+## Launch Sequencer Supporting Services
 In a new terminal, source the workspace and run
 ```
-ros2 run ros2_execution ros2_execution.py --ros-args -p PROGRAM_FILENAME:="panda_test" -p ROBOT_MODEL:="panda" -p EE_MODEL:="panda_hand"
+ros2 launch sequencer supporting_services.launch.py enable_capgrasp:=LOOK_AT_DESCRIPTION_BELOW
 ```
+enable_capgrasp choices are true or false
+
+This will launch the robot controller, grasping attacher node, and CAPGrasp service server.
+
+## Launch Sequencer State Machine
+In a new terminal, source the workspace and run
+```
+ros2 launch sequencer sequencer_client.launch.py grasp_type:=LOOK_AT_DESCRIPTION_BELOW
+```
+grasp_type choices are:
+- grasp_type:=default
+- grasp_type:=capgrasp
+- grasp_type:=ggcnn
+
+This will launch the state machine with the appropriate grasp service.
