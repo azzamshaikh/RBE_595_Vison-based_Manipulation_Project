@@ -39,7 +39,7 @@ public:
 private:
     void pointCloudCallback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg)
     {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
         pcl::fromROSMsg(*cloud_msg, *cloud);
 
         // // Lookup transformation from "camera_link_optical" to "world"
@@ -58,14 +58,14 @@ private:
 
         // // Apply transformation to the point cloud
         // pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-        pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
         // pcl::transformPointCloud(*cloud, *transformed_cloud, transform);
 
 
         // Create the filtering object
-        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+        pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
         sor.setInputCloud (cloud);
-        sor.setMeanK (50);
+        sor.setMeanK (200);
         sor.setStddevMulThresh (0.5);
         sor.filter (*filtered_cloud);
 
