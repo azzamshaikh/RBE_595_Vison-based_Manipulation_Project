@@ -1,3 +1,7 @@
+# ROS2 packages
+install/*
+log/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
