@@ -89,6 +89,12 @@ public:
         int v_step = int((y_max - y_min) / 20);
         int u_step = int((x_max - x_min) / 20);
 
+        int y_center = int((y_max - y_min) / 2);
+        int x_center = int((x_max - x_min) / 2);
+
+        std::vector<float> centroid = this->image_to_coord(y_center, x_center); //        v is y, u is x
+        //std::cout << "Centroid: " << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
         int K = 1;
@@ -96,11 +102,14 @@ public:
         std::vector<int> pointIdxKnnSearch(K);
         std::vector<float> pointKNNSquaredDistance(K);
 
-        int counter = 0;
-
         for (int v = y_min; v < y_max; v += v_step){
             for (int u = x_min; u < x_max; u += u_step){
                 std::vector<float> pixel_coord = this->image_to_coord(v, u); //        v is y, u is x
+                // std::cout << "Pixel: " << pixel_coord[0] << " " << pixel_coord[1] << " " << pixel_coord[2] << std::endl;
+                if(this->euclidean_distance(centroid, pixel_coord) > 3.0){
+                    continue;
+                }
+
                 pcl::PointXYZRGB queryPoint;
                 queryPoint.x = pixel_coord[0];
                 queryPoint.y = pixel_coord[1];
@@ -219,6 +228,14 @@ private:
 
     std::vector<int> bounding_box_;
     int num_predictions_ = 0;
+
+    float euclidean_distance(std::vector<float> point1, std::vector<float> point2){
+        //float distance = std::hypot(point1[0]-point2[0], point1[1]-point2[1]);
+
+        float distance = std::sqrt(std::pow((point2[0] - point1[0]), 2) + std::pow((point2[1] - point1[0]), 2));
+        //std::cout << "Distance " << distance << std::endl;
+        return distance;
+    }
 
 
     void boundingBoxCallback(const std_msgs::msg::Int32MultiArray::SharedPtr msg) {

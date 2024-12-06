@@ -33,6 +33,7 @@ class RobotActionClient(Node):
                                self.close_gripper,
                                self.attach_object,
                                self.return_from_grasp,
+                               self.clear_the_objects,
                                self.go_to_basket,
                                self.open_gripper,
                                self.detach_object,
@@ -307,6 +308,29 @@ class RobotActionClient(Node):
                 "movex": 0.0,
                 "movey": -0.1,
                 "movez": 0.0,
+            },
+            "speed": 0.5
+        }
+        commands = self.publish_action(grasp_action)
+        return commands
+    
+    def clear_the_objects(self):
+        grasp_action = {
+            # "action": "MoveXYZW",
+            # "value": {
+            #     "positionx": self.target_pose["positionx"],
+            #     "positiony": self.target_pose["positiony"],
+            #     "positionz": self.target_pose["positionz"],
+            #     "yaw": self.target_pose["yaw"],
+            #     "pitch": self.target_pose["pitch"],
+            #     "roll": self.target_pose["roll"]
+            # },
+            # "speed": 0.5
+            "action": "MoveL",
+            "value": {
+                "movex": 0.0,
+                "movey": 0.0,
+                "movez": 0.1,
             },
             "speed": 0.5
         }
