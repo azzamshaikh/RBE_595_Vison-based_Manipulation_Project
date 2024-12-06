@@ -25,7 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'grasp_service = capgrasp_srv_cli.grasp_service:main'
+            'grasp_service = capgrasp_srv_cli.grasp_service:main',
+            'grasp_client = capgrasp_srv_cli.grasp_client:main'
         ],
     },
 )
