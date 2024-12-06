@@ -32,6 +32,7 @@ class RobotActionClient(Node):
                                self.go_to_grasp,
                                self.close_gripper,
                                self.attach_object,
+                               self.return_from_grasp,
                                self.go_to_basket,
                                self.open_gripper,
                                self.detach_object,
@@ -61,6 +62,14 @@ class RobotActionClient(Node):
             10
         )
 
+        self.classifier = None
+        self.classifier_sub = self.create_subscription(
+            Int32MultiArray,
+            "/yolo/prediction/classifier",
+            self.classifier_callback,
+            10
+        )
+
     def num_predictions_callback(self, msg:Int32):
         self.num_predictions = msg.data
 
@@ -70,6 +79,12 @@ class RobotActionClient(Node):
 
     def get_number_of_objects(self):
         return self.num_predictions
+    
+    def classifier_callback(self, msg:Int32MultiArray):
+        self.classifier = np.array(msg.data)
+
+    def get_top_classifier(self):
+        return float(self.classifier[0])
 
 
     def send_goal(self, commands):
@@ -172,9 +187,9 @@ class RobotActionClient(Node):
         elif action["action"] == "GripperClose":
             commands = [2.0]
         elif action["action"] == "Attach":
-            commands = [3.0]
+            commands = [3.0, action['value']['object']]
         elif action["action"] == "Detach":
-            commands = [4.0]
+            commands = [4.0, action['value']['object']]
         elif action["action"] == "MoveJs":
             commands = [5.0,
                         action["value"]["joint1"],
@@ -221,14 +236,17 @@ class RobotActionClient(Node):
         
 
     def attach_object(self):
-        attach = {'action': 'Attach', 'value': {'object': 'sugar3', 'endeffector': 'end_effector_frame'}}
+        attach = {'action': 'Attach', 
+                  'value': {'object': self.get_top_classifier(), 
+                            'endeffector': 'end_effector_frame'}}
         # 6. Attach Object:
         commands = self.publish_action(attach)
         return commands
 
 
     def detach_object(self):
-        dettach = {'action': 'Detach', 'value': {'object': 'sugar3'}}
+        dettach = {'action': 'Detach', 
+                   'value': {'object': self.get_top_classifier()}}
         # 10. Detacth Object:
         commands = self.publish_action(dettach)
         return commands
@@ -265,6 +283,29 @@ class RobotActionClient(Node):
             "value": {
                 "movex": 0.0,
                 "movey": 0.1,
+                "movez": 0.0,
+            },
+            "speed": 0.5
+        }
+        commands = self.publish_action(grasp_action)
+        return commands
+    
+    def return_from_grasp(self):
+        grasp_action = {
+            # "action": "MoveXYZW",
+            # "value": {
+            #     "positionx": self.target_pose["positionx"],
+            #     "positiony": self.target_pose["positiony"],
+            #     "positionz": self.target_pose["positionz"],
+            #     "yaw": self.target_pose["yaw"],
+            #     "pitch": self.target_pose["pitch"],
+            #     "roll": self.target_pose["roll"]
+            # },
+            # "speed": 0.5
+            "action": "MoveL",
+            "value": {
+                "movex": 0.0,
+                "movey": -0.1,
                 "movez": 0.0,
             },
             "speed": 0.5
@@ -379,7 +420,7 @@ class ShelfPickingStateMachine(StateMachine):
             pose = self.objects[0]
         else:
             pose = self.objects[0]
-        
+        rclpy.spin_once(self.action_client)
         self.action_client.set_target_pose(pose)
         self.actions_list = self.action_client.get_goals()
         

@@ -11,7 +11,7 @@
     </include>
 
     <light name='user_point_light_0' type='point'>
-      <pose>0 0 1.5 0 0 0</pose>
+      <pose>0 0 1.25 0 0 0</pose>
       <diffuse>0.5 0.5 0.5 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <attenuation>
@@ -30,10 +30,29 @@
     </include>
 
     <include>
-      <name>sugar3</name>
+      <name>ycb_004_sugar_box</name>
       <uri>model://sugar_box</uri>
-      <pose>0.0 0.65 0.51 0 0 3.14</pose>
+      <pose>0.0 0.56 0.51 0 0 3.14</pose>
     </include>
+
+    <include>
+      <name>ycb_009_gelatin_box</name>
+      <uri>model://gelatin_box</uri>
+      <pose>-0.28 0.56 0.51 0 0 3.14</pose>
+    </include>
+
+    <include>
+      <name>ycb_006_mustard_bottle</name>
+      <uri>model://mustard_bottle</uri>
+      <pose>0.39 0.54 0.51 0 0 -3.13</pose>
+    </include>
+
+    <include>
+      <name>bin</name>
+      <uri>model://bin</uri>
+      <pose>0.0 -0.5 0.0 0 0 0</pose>
+    </include>
+
 
 
 

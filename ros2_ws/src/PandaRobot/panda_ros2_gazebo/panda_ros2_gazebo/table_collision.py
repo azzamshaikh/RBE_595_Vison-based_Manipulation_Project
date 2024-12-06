@@ -31,7 +31,7 @@ class AddCollisionGeometryNode(Node):
         # Define the pose of the box
         box_pose = Pose()
         box_pose.position.x = 0.0
-        box_pose.position.y = 0.8
+        box_pose.position.y = 0.9
         box_pose.position.z = 0.0
         box_pose.orientation.w = 1.0
 
@@ -40,10 +40,31 @@ class AddCollisionGeometryNode(Node):
         collision_object.primitive_poses.append(box_pose)
         collision_object.operation = CollisionObject.ADD
 
+        # Define the box dimensions
+        camera = SolidPrimitive()
+        camera.type = SolidPrimitive.BOX
+        camera.dimensions = [0.2, 0.2, 0.2]  # Dimensions in meters (x, y, z)
+
+        # Define the pose of the box
+        camera_pose = Pose()
+        camera_pose.position.x = -0.3
+        camera_pose.position.y = 0.0
+        camera_pose.position.z = 1.0
+        camera_pose.orientation.w = 1.0
+
+        # Add the primitive and pose to the collision object
+        collision_object.primitives.append(camera)
+        collision_object.primitive_poses.append(camera_pose)
+        collision_object.operation = CollisionObject.ADD
+
         # Publish the planning scene update
         planning_scene = PlanningScene()
         planning_scene.world.collision_objects.append(collision_object)
         planning_scene.is_diff = True
+
+
+
+
 
         self.get_logger().info(f"Adding collision object: {collision_object.id}")
         self.planning_scene_publisher.publish(planning_scene)

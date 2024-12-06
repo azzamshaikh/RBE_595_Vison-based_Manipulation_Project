@@ -22,6 +22,7 @@ import time
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist
 from rclpy.executors import MultiThreadedExecutor
 import os
+import yaml
 
 RES = "null"
 
@@ -37,6 +38,14 @@ class Controller(Node):
         )
         # self.subscription = self.create_subscription(Float64MultiArray, "/robotaction", self.callback, 10)
         # self.subscription
+
+        folder_path = os.path.join(os.getcwd(),"src","yolo_finetune","ycb_foods")
+        yaml_path = os.path.join(folder_path, "data.yaml")
+        with open(yaml_path,'r') as file:
+            self.yaml_data = yaml.safe_load(file)
+        self.ycb_names = self.yaml_data['names']
+        print(self.ycb_names[2])
+        print(self.ycb_names[7])
 
         self.MoveG_CLIENT = MoveGclient()
         self.Attach_Client = ATTACHERclient()
@@ -73,9 +82,11 @@ class Controller(Node):
             commands = {"action": "GripperClose"}
         elif input[0] == 3.0:
             commands = {'action': 'Attach', 
-                        'value': {'object': 'sugar3', 'endeffector': 'end_effector_frame'}}
+                        'value': {'object': self.ycb_names[int(input[1])], 
+                                  'endeffector': 'end_effector_frame'}}
         elif input[0] == 4.0:
-            commands = {'action': 'Detach', 'value': {'object': 'sugar3'}}
+            commands = {'action': 'Detach', 
+                        'value': {'object': self.ycb_names[int(input[1])]}}
         elif input[0] == 5.0:
             joints = {'joint1':input[1],
                     'joint2':input[2],
@@ -159,7 +170,7 @@ class Controller(Node):
             else:
                 print("MoveXYZW ACTION in step number -> " + str(i) + " failed.")
                 print("The program will be closed. Bye!")
-                self.nodeLOG.get_logger().info("ERROR: Program finished since MoveXYZW ACTION in step number -> " + str(i) + " failed.")
+
 
         elif (trigger['action'] == 'MoveXYZ'):
             
@@ -194,7 +205,6 @@ class Controller(Node):
                 RES = "null"
             else:
                 print("MoveXYZ ACTION in step number -> " + str(i) + " failed.")
-                self.nodeLOG.get_logger().info("ERROR: Program finished since MoveXYZ ACTION in step number -> " + str(i) + " failed.")
                 print("The program will be closed. Bye!")
 
         elif (trigger['action'] == 'MoveJs'):

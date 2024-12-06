@@ -310,6 +310,12 @@ def generate_launch_description():
         name="table_collision_node"
     )
 
+    gripper_attacher = Node(
+        package="ros2_grasping",
+        executable="attacher_action.py",
+        name="grasp_attacher"
+    )
+
     # *********************** ROS2.0 Robot/End-Effector Actions/Triggers *********************** #
     # MoveJ ACTION:
     moveJ_interface = Node(
@@ -472,6 +478,6 @@ def generate_launch_description():
 
                     ]
                 )
-            )
+            ),
         ]
     )
