@@ -49,7 +49,7 @@ class AddCollisionGeometryNode(Node):
         box2_pose = Pose()
         box2_pose.position.x = 0.0
         box2_pose.position.y = 0.95
-        box2_pose.position.z = 1.3
+        box2_pose.position.z = 1.65
         box2_pose.orientation.w = 1.0
 
         collision_object2.primitives.append(box2)
