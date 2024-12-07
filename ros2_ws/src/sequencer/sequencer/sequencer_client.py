@@ -13,8 +13,6 @@ import numpy as np
 from statemachine import State, StateMachine
 from statemachine.contrib.diagram import DotGraphMachine
 
-
-
 SEQ_RES = "null"
 
 class RobotActionClient(Node):
@@ -366,13 +364,18 @@ class GraspClient(Node):
         self.req.start = True
         self.future = self.cli.call_async(self.req)
 
-class GGCNN(Node):
+class GGCNNGraspClient(Node):
+
     def __init__(self):
-        super().__init__('ggcnn_client')
-        raise NotImplementedError
+        super().__init__('ggcnn_grasp_client')
+        self.cli = self.create_client(CAPGrasp, 'ggcnn_grasp')
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available. waiting again...')
+        self.req = CAPGrasp.Request()
 
     def send_request(self):
-        raise NotImplementedError
+        self.req.start = True
+        self.future = self.cli.call_async(self.req)
 
 class ShelfPickingStateMachine(StateMachine):
 
@@ -445,7 +448,18 @@ class ShelfPickingStateMachine(StateMachine):
             pose.append(45.0)
             pose.append(90.0)
         elif self.grasp_type == "ggcnn":
-            raise NotImplementedError
+            self.grasp_client.send_request()
+            while rclpy.ok():
+                rclpy.spin_once(ggcnngrasp_client)
+                self.grasp_client.get_logger().info('Waiting for result...')
+                if ggcnngrasp_client.future.done():
+                    response = self.grasp_client.future.result()
+                    pose = response.xyz.tolist()
+                    self.grasp_client.get_logger().info(f"grasp pose is {response.xyz.tolist()}")
+                    break
+            pose.append(180.0)
+            pose.append(45.0)
+            pose.append(90.0)
         elif self.grasp_type == "default":
             pose = self.objects[0]
         else:
@@ -521,7 +535,7 @@ def main(args=None):
                                     grasp_type,
                                     grasp_client)
     elif grasp_type == "ggcnn":
-        grasp_client = GGCNN()
+        grasp_client = GGCNNGraspClient()
 
         sm = ShelfPickingStateMachine(action_client,
                                     grasp_type,
@@ -540,6 +554,8 @@ def main(args=None):
 
     while not sm.is_done:
         sm.cycle()
+        # rclpy.spin_once(action_client)
+        # rclpy.spin_once(ggcnn_service_node)
 
     # object1 = [0.0, 0.45, 0.6, 180.0,45.0,90.0]
     # object2 = [-0.1, 0.45, 0.6, 180.0,45.0,90.0]

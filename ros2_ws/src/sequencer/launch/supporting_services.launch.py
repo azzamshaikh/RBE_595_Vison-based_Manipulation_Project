@@ -1,21 +1,20 @@
-import os
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration, Command
-from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument, TimerAction
-from launch.conditions import IfCondition, UnlessCondition
-from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-import xacro
-import yaml
-
 
 def generate_launch_description():
-    enable_node_arg = DeclareLaunchArgument(
+    enable_capgrasp_arg = DeclareLaunchArgument(
         'enable_capgrasp',
-        default_value='true',  # Default is false
-        description='Enable or disable the node. Set to "true" or "false".'
+        default_value='true',
+        description='Enable or disable the capgrasp node. Set to "true" or "false".'
+    )
+
+    enable_ggcnn_arg = DeclareLaunchArgument(
+        'enable_ggcnn',
+        default_value='true',
+        description='Enable or disable the ggcnn node. Set to "true" or "false".'
     )
 
     attacher = Node(
@@ -33,6 +32,14 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('enable_capgrasp'))
     )
 
+    ggcnn_srv = Node(
+        package="ros2_ggcnn",
+        executable="ggcnn_service_node",
+        name="ggcnn_service_node",
+        output="log",
+        condition=IfCondition(LaunchConfiguration('enable_ggcnn'))
+    )
+
     controller = Node(
         package="sequencer",
         executable="controller",
@@ -40,12 +47,13 @@ def generate_launch_description():
         output="screen"
     )
 
-
     return LaunchDescription(
         [
-            enable_node_arg,
+            enable_capgrasp_arg,
+            enable_ggcnn_arg,
             attacher,
             capgrasp_srv,
+            ggcnn_srv,
             controller
         ]
     )
