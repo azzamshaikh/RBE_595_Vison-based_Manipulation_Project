@@ -1,6 +1,16 @@
 from setuptools import find_packages, setup
+import os
 
 package_name = 'ros2_ggcnn'
+
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+extra_files = package_files('ros2_ggcnn/models')
 
 setup(
     name=package_name,
@@ -10,6 +20,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/models', extra_files),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
