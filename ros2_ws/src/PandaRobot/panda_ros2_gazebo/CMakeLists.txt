@@ -46,6 +46,7 @@ install(
 install(
   PROGRAMS
   panda_ros2_gazebo/table_collision.py  
+  panda_ros2_gazebo/shelf_collision.py
   DESTINATION lib/${PROJECT_NAME}     
 )
 # ament_python_install_package(${PROJECT_NAME})
