@@ -65,7 +65,7 @@ private:
         // Create the filtering object
         pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
         sor.setInputCloud (cloud);
-        sor.setMeanK (50);
+        sor.setMeanK (100);
         sor.setStddevMulThresh (0.001);
         sor.filter (*filtered_cloud);
 

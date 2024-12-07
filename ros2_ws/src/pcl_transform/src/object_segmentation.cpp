@@ -106,7 +106,7 @@ public:
             for (int u = x_min; u < x_max; u += u_step){
                 std::vector<float> pixel_coord = this->image_to_coord(v, u); //        v is y, u is x
                 // std::cout << "Pixel: " << pixel_coord[0] << " " << pixel_coord[1] << " " << pixel_coord[2] << std::endl;
-                if(this->euclidean_distance(centroid, pixel_coord) > 3.0){
+                if(this->euclidean_distance(centroid, pixel_coord) > 2.5){
                     continue;
                 }
 

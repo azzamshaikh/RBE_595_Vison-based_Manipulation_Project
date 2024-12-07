@@ -113,6 +113,26 @@ class AddCollisionGeometryNode(Node):
         collision_object5.primitive_poses.append(camera_pose)
         collision_object5.operation = CollisionObject.ADD
 
+        # Create the side_left collision object
+        collision_object6 = CollisionObject()
+        collision_object6.id = "box_6"
+        collision_object6.header.frame_id = "world"
+
+        box6 = SolidPrimitive()
+        box6.type = SolidPrimitive.BOX
+        box6.dimensions = [0.88, 0.4, 0.02]
+
+        box6_pose = Pose()
+        box6_pose.position.x = 0.0
+        box6_pose.position.y = 0.8
+        box6_pose.position.z = 0.8
+        box6_pose.orientation.w = 1.0
+
+        collision_object6.primitives.append(box6)
+        collision_object6.primitive_poses.append(box6_pose)
+        collision_object6.operation = CollisionObject.ADD
+
+
         # Publish the planning scene updates
         planning_scene = PlanningScene()
         planning_scene.world.collision_objects.append(collision_object1)
@@ -120,6 +140,7 @@ class AddCollisionGeometryNode(Node):
         planning_scene.world.collision_objects.append(collision_object3)
         planning_scene.world.collision_objects.append(collision_object4)
         planning_scene.world.collision_objects.append(collision_object5)
+        planning_scene.world.collision_objects.append(collision_object6)
         planning_scene.is_diff = True
 
         self.get_logger().info(f"Adding collision objects: {collision_object1.id}, {collision_object2.id}, {collision_object3.id}, {collision_object4.id}, {collision_object5.id}")
