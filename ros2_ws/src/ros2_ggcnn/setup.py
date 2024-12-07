@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ggcnn_service_node = ros2_ggcnn.ggcnn_service_node:main',
+            'ggcnn_client_node = ros2_ggcnn.ggcnn_client_node:main'
         ],
     },
 )
