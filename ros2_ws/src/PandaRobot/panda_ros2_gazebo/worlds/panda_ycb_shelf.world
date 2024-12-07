@@ -43,7 +43,7 @@
     <include>
       <name>ycb_009_gelatin_box</name>
       <uri>model://gelatin_box</uri>
-      <pose>-0.236 0.613 0.44 0 0 3.14</pose>
+      <pose>-0.236 0.613 0.44 0 0 3.03</pose>
     </include>
 
     <include>
