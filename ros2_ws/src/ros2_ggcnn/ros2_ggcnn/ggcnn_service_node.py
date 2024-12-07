@@ -95,7 +95,7 @@ class GGCNNServiceNode(Node):
         grasp_x += updated_top_corner[0]
         grasp_y += updated_top_corner[1]
 
-        # show_grasp_on_image(self.depth_image, grasp_x, grasp_y, angle, grasp_width)
+        show_grasp_on_image(self.depth_image, grasp_x, grasp_y, angle, grasp_width)
         point_depth = self.depth_image[grasp_y, grasp_x]
 
         if point_depth == 0:

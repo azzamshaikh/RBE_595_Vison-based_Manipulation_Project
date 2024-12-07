@@ -403,7 +403,7 @@ class ShelfPickingStateMachine(StateMachine):
             self.grasp_type = grasp_type
             self.action_client.get_logger().info("Using " + grasp_type + " for grasping!")
         elif grasp_type == "ggcnn":
-            self.grasp_type = "default"
+            self.grasp_type = grasp_type
             self.action_client.get_logger().info("Using " + grasp_type + " for grasping!")
         elif grasp_type == "default":
             self.grasp_type = grasp_type
@@ -450,9 +450,9 @@ class ShelfPickingStateMachine(StateMachine):
         elif self.grasp_type == "ggcnn":
             self.grasp_client.send_request()
             while rclpy.ok():
-                rclpy.spin_once(ggcnngrasp_client)
+                rclpy.spin_once(self.grasp_client)
                 self.grasp_client.get_logger().info('Waiting for result...')
-                if ggcnngrasp_client.future.done():
+                if self.grasp_client.future.done():
                     response = self.grasp_client.future.result()
                     pose = response.xyz.tolist()
                     self.grasp_client.get_logger().info(f"grasp pose is {response.xyz.tolist()}")

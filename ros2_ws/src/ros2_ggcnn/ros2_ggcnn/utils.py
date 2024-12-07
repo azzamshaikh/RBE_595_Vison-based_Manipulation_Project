@@ -62,7 +62,7 @@ def show_grasp_on_image(depth_image, grasp_x, grasp_y, angle, grasp_width):
         plt.imshow(grasp_display)
         plt.title("Grasp Rectangle")
         plt.axis('off')
-        plt.show()    
+        plt.savefig('grasp_rectangle.png')
 
 def transform_to_matrix(transform):
     """Convert ROS transform to 4x4 transformation matrix."""
@@ -117,7 +117,7 @@ def post_process_output(q_img, cos_img, sin_img, width_img):
 def calculate_grasp(q_img, ang_img, width_img, bounding_box):
     # Only consider the center region of the image
     # q_img_temp = q_img[bounding_box[1]:bounding_box[3], bounding_box[0]:bounding_box[2]]
-    q_img_temp = q_img[bounding_box[1]:bounding_box[3], bounding_box[0]:2*(bounding_box[0] + bounding_box[2]) // 3]
+    q_img_temp = q_img[bounding_box[1]:bounding_box[1] + 2 * (bounding_box[3] - bounding_box[1]) // 3, bounding_box[0]:bounding_box[2]]
     max_q_idx = np.unravel_index(np.argmax(q_img_temp), q_img_temp.shape)
     max_q_idx = (max_q_idx[0] + bounding_box[1], max_q_idx[1] + bounding_box[0])
     grasp_x, grasp_y = max_q_idx
