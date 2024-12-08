@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from ros2_data/action/MoveYPR.action
+// generated code does not contain a copyright notice
+
+
+module ros2_data {
+  module action {
+    struct MoveYPR_Goal {
+      double yaw;
+
+      double pitch;
+
+      double roll;
+
+      double speed;
+    };
+    struct MoveYPR_Result {
+      string result;
+    };
+    struct MoveYPR_Feedback {
+      string feedback;
+    };
+  };
+};

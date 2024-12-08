@@ -1,0 +1,4 @@
+srv/CAPGrasp.idl
+srv/CAPGrasp.srv
+srv/CAPGrasp_Request.msg
+srv/CAPGrasp_Response.msg

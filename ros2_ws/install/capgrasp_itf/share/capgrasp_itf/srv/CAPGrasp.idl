@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from capgrasp_itf/srv/CAPGrasp.srv
+// generated code does not contain a copyright notice
+
+
+module capgrasp_itf {
+  module srv {
+    struct CAPGrasp_Request {
+      boolean start;
+    };
+    struct CAPGrasp_Response {
+      sequence<double> xyz;
+    };
+  };
+};

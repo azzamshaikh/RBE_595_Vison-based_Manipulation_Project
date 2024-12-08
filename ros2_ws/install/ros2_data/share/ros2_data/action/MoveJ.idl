@@ -1,0 +1,21 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from ros2_data/action/MoveJ.action
+// generated code does not contain a copyright notice
+
+#include "ros2_data/msg/JointPose.idl"
+
+module ros2_data {
+  module action {
+    struct MoveJ_Goal {
+      ros2_data::msg::JointPose goal;
+
+      double speed;
+    };
+    struct MoveJ_Result {
+      string result;
+    };
+    struct MoveJ_Feedback {
+      string feedback;
+    };
+  };
+};

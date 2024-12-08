@@ -1,0 +1,11 @@
+source;share/sequencer_itf/hook/cmake_prefix_path.ps1
+source;share/sequencer_itf/hook/cmake_prefix_path.dsv
+source;share/sequencer_itf/hook/cmake_prefix_path.sh
+source;share/sequencer_itf/hook/ld_library_path_lib.ps1
+source;share/sequencer_itf/hook/ld_library_path_lib.dsv
+source;share/sequencer_itf/hook/ld_library_path_lib.sh
+source;share/sequencer_itf/local_setup.bash
+source;share/sequencer_itf/local_setup.dsv
+source;share/sequencer_itf/local_setup.ps1
+source;share/sequencer_itf/local_setup.sh
+source;share/sequencer_itf/local_setup.zsh

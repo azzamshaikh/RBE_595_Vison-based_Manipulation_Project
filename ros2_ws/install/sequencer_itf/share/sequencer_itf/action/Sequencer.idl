@@ -1,0 +1,18 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from sequencer_itf/action/Sequencer.action
+// generated code does not contain a copyright notice
+
+
+module sequencer_itf {
+  module action {
+    struct Sequencer_Goal {
+      sequence<double> commands;
+    };
+    struct Sequencer_Result {
+      string result;
+    };
+    struct Sequencer_Feedback {
+      string feedback;
+    };
+  };
+};
