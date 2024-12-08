@@ -25,7 +25,7 @@ from capgrasp_itf.srv import CAPGrasp
 from sensor_msgs.msg import PointCloud2
 from rclpy.executors import MultiThreadedExecutor
 import ros2_numpy
-
+from scipy.spatial.transform import Rotation as R
 
 def setup_args():
     parser = argparse.ArgumentParser(
@@ -342,7 +342,10 @@ class CAPGraspService(Node):
 
 
         best_pose = poses[0]
-        output = [round(float(best_pose[4]),3), round(float(best_pose[5]),3), round(float(best_pose[6]),3)]
+        r = R.from_quat([best_pose[0], best_pose[1], best_pose[2], best_pose[3]])
+        ypr = r.as_euler('zyx', degrees=True)
+        self.get_logger().info(f'rpy is {ypr[0]}, {ypr[1]}, {ypr[2]}')
+        output = [round(float(best_pose[4]),3), round(float(best_pose[5]),3), round(float(best_pose[6]),3)]#, float(ypr[0]), float(ypr[1]),float(ypr[2])]
 
         print(output)
         response.xyz = output
