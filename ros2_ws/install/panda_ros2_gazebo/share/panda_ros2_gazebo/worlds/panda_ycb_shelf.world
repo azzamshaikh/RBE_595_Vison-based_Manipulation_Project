@@ -49,7 +49,7 @@
     <include>
       <name>ycb_006_mustard_bottle</name>
       <uri>model://mustard_bottle</uri>
-      <pose>0.304 0.606 0.809 0 0 3.10</pose>
+      <pose>-0.304 0.606 0.44 0 0 3.10</pose>
     </include>
 
     <include>

@@ -5,7 +5,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, Command
-from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument, TimerAction
+from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument, TimerAction, LogInfo
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -94,7 +94,7 @@ def generate_launch_description():
     # camera_file = os.path.join(camera_description_path,
     #                                  'urdf',
     #                                  'camera.urdf')
-    # camera_doc = open(camera_file).read()
+    # camera_doc = open(camera_file).read()camera_description
     # camera_description = {'robot_description': camera_doc}
     # camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
     #                     arguments=['-file',camera_file,
@@ -168,7 +168,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="camera_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"], #base_link --> camera_link
         # [
         #     # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
         #     "0.0",
@@ -227,6 +227,11 @@ def generate_launch_description():
     rviz_arg = DeclareLaunchArgument(
         "rviz_file", default_value="False", description="Load RVIZ file."
     )
+    # rviz_arg = DeclareLaunchArgument(
+    #     'rvizconfig',
+    #     default_value=os.path.join(get_package_share_directory('panda_ros2_moveit2'), 'config', 'panda_moveit2.rviz'),
+    #     description='Full path to the RVIZ config file to use'
+    # )
 
     # *** PLANNING CONTEXT *** #
     # Robot description, SRDF:
@@ -392,15 +397,27 @@ def generate_launch_description():
     
     return LaunchDescription(
         [
-            # Gazebo nodes:
-            gazebo, 
+            # # Gazebo nodes:
+            gazebo,
             spawn_entity,
-            # ROS2_CONTROL:
+            # # ROS2_CONTROL:
             static_tf,
             robot_state_publisher,
-            camera_spawn,
-            camera_static_tf,
-            camera_state_publisher,
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=spawn_entity,
+                    on_exit=[
+                        TimerAction(
+                            period=5.0,
+                            actions=[
+                                LogInfo(msg="Spawning camera..."),
+                                camera_spawn,
+                                camera_static_tf,
+                                camera_state_publisher,]
+                        )
+                    ]
+                )
+            ),            
             
             # ROS2 Controllers:
             RegisterEventHandler(
@@ -443,7 +460,7 @@ def generate_launch_description():
 
                         # MoveIt!2:
                         TimerAction(
-                            period=5.0,
+                            period=10.0,
                             actions=[
                                 rviz_arg,
                                 rviz_node_full,
@@ -453,7 +470,7 @@ def generate_launch_description():
 
                         # Shelf Collision
                         TimerAction(
-                            period=5.0,
+                            period=10.0,
                             actions=[
                                 shelf_collision_node
                             ]
@@ -462,7 +479,7 @@ def generate_launch_description():
 
                         # ROS2.0 Actions:
                         TimerAction(
-                            period=2.0,
+                            period=10.0,
                             actions=[
                                 moveJ_interface,
                                 moveG_interface,

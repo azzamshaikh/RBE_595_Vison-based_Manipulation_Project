@@ -398,16 +398,9 @@ def generate_launch_description():
     return LaunchDescription(
         [
             # # Gazebo nodes:
-            # gazebo, 
-            # spawn_entity,
-            # # ROS2_CONTROL:
-            # static_tf,
-            # robot_state_publisher,
-            # camera_spawn,
-            # camera_static_tf,
-            # camera_state_publisher,
             gazebo,
             spawn_entity,
+            # # ROS2_CONTROL:
             static_tf,
             robot_state_publisher,
             RegisterEventHandler(
@@ -424,8 +417,7 @@ def generate_launch_description():
                         )
                     ]
                 )
-            ),
-            
+            ),            
             
             # ROS2 Controllers:
             RegisterEventHandler(
