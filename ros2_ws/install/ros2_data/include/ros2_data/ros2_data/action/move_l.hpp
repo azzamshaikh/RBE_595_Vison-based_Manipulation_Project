@@ -7,5 +7,6 @@
 #include "ros2_data/action/detail/move_l__struct.hpp"
 #include "ros2_data/action/detail/move_l__builder.hpp"
 #include "ros2_data/action/detail/move_l__traits.hpp"
+#include "ros2_data/action/detail/move_l__type_support.hpp"
 
 #endif  // ROS2_DATA__ACTION__MOVE_L_HPP_

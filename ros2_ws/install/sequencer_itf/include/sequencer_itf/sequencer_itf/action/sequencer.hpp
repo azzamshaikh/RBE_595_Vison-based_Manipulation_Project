@@ -7,5 +7,6 @@
 #include "sequencer_itf/action/detail/sequencer__struct.hpp"
 #include "sequencer_itf/action/detail/sequencer__builder.hpp"
 #include "sequencer_itf/action/detail/sequencer__traits.hpp"
+#include "sequencer_itf/action/detail/sequencer__type_support.hpp"
 
 #endif  // SEQUENCER_ITF__ACTION__SEQUENCER_HPP_

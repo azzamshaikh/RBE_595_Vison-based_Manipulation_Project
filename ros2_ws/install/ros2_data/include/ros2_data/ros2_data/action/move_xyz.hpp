@@ -7,5 +7,6 @@
 #include "ros2_data/action/detail/move_xyz__struct.hpp"
 #include "ros2_data/action/detail/move_xyz__builder.hpp"
 #include "ros2_data/action/detail/move_xyz__traits.hpp"
+#include "ros2_data/action/detail/move_xyz__type_support.hpp"
 
 #endif  // ROS2_DATA__ACTION__MOVE_XYZ_HPP_

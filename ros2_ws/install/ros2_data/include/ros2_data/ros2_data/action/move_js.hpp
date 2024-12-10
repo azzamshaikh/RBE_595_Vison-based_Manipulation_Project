@@ -7,5 +7,6 @@
 #include "ros2_data/action/detail/move_js__struct.hpp"
 #include "ros2_data/action/detail/move_js__builder.hpp"
 #include "ros2_data/action/detail/move_js__traits.hpp"
+#include "ros2_data/action/detail/move_js__type_support.hpp"
 
 #endif  // ROS2_DATA__ACTION__MOVE_JS_HPP_

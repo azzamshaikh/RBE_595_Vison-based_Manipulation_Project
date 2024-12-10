@@ -7,5 +7,6 @@
 #include "capgrasp_itf/srv/detail/cap_grasp__struct.hpp"
 #include "capgrasp_itf/srv/detail/cap_grasp__builder.hpp"
 #include "capgrasp_itf/srv/detail/cap_grasp__traits.hpp"
+#include "capgrasp_itf/srv/detail/cap_grasp__type_support.hpp"
 
 #endif  // CAPGRASP_ITF__SRV__CAP_GRASP_HPP_

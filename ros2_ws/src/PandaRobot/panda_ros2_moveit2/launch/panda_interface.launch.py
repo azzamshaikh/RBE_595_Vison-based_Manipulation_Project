@@ -20,8 +20,8 @@ def load_file(package_name, file_path):
         with open(absolute_file_path, 'r') as file:
             return file.read()
     except EnvironmentError:
-        # parent of IOError, OSError *and* WindowsError where available.
         return None
+
 # LOAD YAML:
 def load_yaml(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -30,12 +30,10 @@ def load_yaml(package_name, file_path):
         with open(absolute_file_path, 'r') as file:
             return yaml.safe_load(file)
     except EnvironmentError:
-        # parent of IOError, OSError *and* WindowsError where available.
         return None
 
 # ========== **GENERATE LAUNCH DESCRIPTION** ========== #
 def generate_launch_description():
-
 
     # *********************** Gazebo *********************** # 
     
@@ -75,66 +73,90 @@ def generate_launch_description():
     # Generate ROBOT_DESCRIPTION for PANDA ROBOT:
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc, mappings={
-        "cell_layout_1": cell_layout_1,
-        "EE_no": EE_no,
+        "cell_layout_1": "true",
+        "EE_no": "true",
         })
     robot_description_config = doc.toxml()
     robot_description = {'robot_description': robot_description_config}
-
+    
     # SPAWN ROBOT TO GAZEBO:
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'panda'],
                         output='screen')
     
-
+    # CAMERA DESCRIPTION
     camera_description_path = os.path.join(
         get_package_share_directory('panda_ros2_gazebo')
     )
-    # camera_file = os.path.join(camera_description_path,
-    #                                  'urdf',
-    #                                  'camera.urdf')
-    # camera_doc = open(camera_file).read()
-    # camera_description = {'robot_description': camera_doc}
-    # camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
-    #                     arguments=['-file',camera_file,
-    #                                '-entity', 'camera',
-    #                                '-x', '0.0',
-    #                                '-y', '0.0',
-    #                                '-z', '1.35',
-    #                                '-R', '0.0',
-    #                                '-P', '0.6',
-    #                                '-Y', '1.57'],
-    #                     output='both')
-
     camera_xacro = os.path.join(camera_description_path,
                                 'urdf',
                                 'camera.urdf.xacro')
     camera_doc = xacro.parse(open(camera_xacro))
     xacro.process_doc(camera_doc)
     camera_description_config = camera_doc.toxml()
-    camera_description = {'robot_description':camera_description_config}
+    camera_description = {'camera_description': camera_description_config}
     camera_spawn = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-topic','robot_description',
+                        arguments=['-topic', 'robot_description',
                                    '-entity', 'camera'],
-                                #    '-x', '0.0',
-                                #    '-y', '0.0',
-                                #    '-z', '1.35',
-                                #    '-R', '0.0',
-                                #    '-P', '0.6',
-                                #    '-Y', '1.57'],
                         output='screen')
 
     # ***** STATIC TRANSFORM ***** #
-    # NODE -> Static TF:
+    # # NODE -> Static TF:
+    # static_tf = Node(
+    #     package="tf2_ros",
+    #     executable="static_transform_publisher",
+    #     name="static_transform_publisher",
+    #     output="log",
+    #     arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+    # )
+    # # Publish TF:
+    # robot_state_publisher = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     output='both',
+    #     parameters=[
+    #         robot_description,
+    #         {"use_sim_time": True}
+    #     ]
+    # )
+
+    # camera_static_tf = Node(
+    #     package="tf2_ros",
+    #     executable="static_transform_publisher",
+    #     name="camera_transform_publisher",
+    #     output="log",
+    #     arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "camera_link"],
+    # )
+
+    # camera_state_publisher = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     name='camera_state_publisher',
+    #     output='both',
+    #     parameters=[
+    #         {'robot_description': camera_description_config},  # Pass the camera description correctly
+    #         {"use_sim_time": True}
+    #     ]
+    # )
+
+    # STATIC TRANSFORM
     static_tf = Node(
+    package="tf2_ros",
+    executable="static_transform_publisher",
+    name="static_transform_publisher",
+    output="log",
+    arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+    )
+    camera_static_tf = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
-        name="static_transform_publisher",
+        name="camera_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "camera_link"],
     )
-    # Publish TF:
+    
+    # ROBOT STATE PUBLISHER
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -144,51 +166,13 @@ def generate_launch_description():
             {"use_sim_time": True}
         ]
     )
-
-    # static_tf = Node(
-    #     package="tf2_ros",
-    #     executable="static_transform_publisher",
-    #     name="camera_transform",
-    #     output="log",
-    #     arguments=[
-    #         # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
-    #         "0.0",
-    #         "0.0",
-    #         "1.35",
-    #         "0.0",
-    #         "0.6",
-    #         "1.57",
-    #         "world",
-    #         "camera_link_optical"
-    #     ]
-    # )
-
-    camera_static_tf = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="camera_transform_publisher",
-        output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
-        # [
-        #     # <origin xyz="0.0 0 1.35" rpy="0 0.6 1.57"/>
-        #     "0.0",
-        #     "0.0",
-        #     "1.35",
-        #     "0.0",
-        #     "0.6",
-        #     "1.57",
-        #     "world",
-        #     "camera_link"
-        # ]
-    )
-
     camera_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='camera_state_publisher',
         output='both',
         parameters=[
-            camera_description,
+            {'robot_description': camera_description_config},
             {"use_sim_time": True}
         ]
     )
@@ -224,8 +208,13 @@ def generate_launch_description():
     # *********************** MoveIt!2 *********************** #   
     
     # Command-line argument: RVIZ file?
+    # rviz_arg = DeclareLaunchArgument(
+    #     "rviz_file", default_value="False", description="Load RVIZ file."
+    # )
     rviz_arg = DeclareLaunchArgument(
-        "rviz_file", default_value="False", description="Load RVIZ file."
+        'rvizconfig',
+        default_value=os.path.join(get_package_share_directory('panda_ros2_moveit2'), 'config', 'panda_moveit2.rviz'),
+        description='Full path to the RVIZ config file to use'
     )
 
     # *** PLANNING CONTEXT *** #
@@ -288,20 +277,27 @@ def generate_launch_description():
     load_RVIZfile = LaunchConfiguration("rviz_file")
     rviz_base = os.path.join(get_package_share_directory("panda_ros2_moveit2"), "config")
     rviz_full_config = os.path.join(rviz_base, "panda_moveit2.rviz")
+    # rviz_node_full = Node(
+    #     package="rviz2",
+    #     executable="rviz2",
+    #     name="rviz2",
+    #     output="log",
+    #     arguments=["-d", rviz_full_config],
+    #     parameters=[
+    #         robot_description,
+    #         # robot_description_semantic,
+    #         # ompl_planning_pipeline_config,
+    #         # kinematics_yaml,
+    #         {"use_sim_time": True}, 
+    #     ],
+    #     condition=UnlessCondition(load_RVIZfile),
+    # )
     rviz_node_full = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", rviz_full_config],
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            ompl_planning_pipeline_config,
-            kinematics_yaml,
-            {"use_sim_time": True}, 
-        ],
-        condition=UnlessCondition(load_RVIZfile),
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', LaunchConfiguration('rvizconfig')],
     )
 
     table_collision_node = Node(

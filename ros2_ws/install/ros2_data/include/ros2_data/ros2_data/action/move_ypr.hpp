@@ -7,5 +7,6 @@
 #include "ros2_data/action/detail/move_ypr__struct.hpp"
 #include "ros2_data/action/detail/move_ypr__builder.hpp"
 #include "ros2_data/action/detail/move_ypr__traits.hpp"
+#include "ros2_data/action/detail/move_ypr__type_support.hpp"
 
 #endif  // ROS2_DATA__ACTION__MOVE_YPR_HPP_

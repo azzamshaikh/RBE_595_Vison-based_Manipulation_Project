@@ -7,5 +7,6 @@
 #include "ros2_data/msg/detail/joint_pose_s__struct.hpp"
 #include "ros2_data/msg/detail/joint_pose_s__builder.hpp"
 #include "ros2_data/msg/detail/joint_pose_s__traits.hpp"
+#include "ros2_data/msg/detail/joint_pose_s__type_support.hpp"
 
 #endif  // ROS2_DATA__MSG__JOINT_POSE_S_HPP_

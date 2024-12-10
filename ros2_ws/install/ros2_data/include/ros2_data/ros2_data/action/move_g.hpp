@@ -7,5 +7,6 @@
 #include "ros2_data/action/detail/move_g__struct.hpp"
 #include "ros2_data/action/detail/move_g__builder.hpp"
 #include "ros2_data/action/detail/move_g__traits.hpp"
+#include "ros2_data/action/detail/move_g__type_support.hpp"
 
 #endif  // ROS2_DATA__ACTION__MOVE_G_HPP_

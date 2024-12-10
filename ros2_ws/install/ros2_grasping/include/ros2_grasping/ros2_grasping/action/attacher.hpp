@@ -7,5 +7,6 @@
 #include "ros2_grasping/action/detail/attacher__struct.hpp"
 #include "ros2_grasping/action/detail/attacher__builder.hpp"
 #include "ros2_grasping/action/detail/attacher__traits.hpp"
+#include "ros2_grasping/action/detail/attacher__type_support.hpp"
 
 #endif  // ROS2_GRASPING__ACTION__ATTACHER_HPP_
