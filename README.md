@@ -61,7 +61,7 @@ Choose the grasping model of choice and set one to true and the other to false.
 
 This will launch the robot controller service, grasping attacher node, and either the CAPGrasp or GGCNN service server.
 
-## Sequencer State Machine
+### Sequencer State Machine
 In a new terminal, source the workspace and run
 ```
 ros2 launch sequencer sequencer_client.launch.py grasp_type:=LOOK_AT_DESCRIPTION_BELOW
